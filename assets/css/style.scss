@@ -1,0 +1,23 @@
+---
+---
+
+@import "{{ site.theme }}";
+@import url(monokai.css);
+
+#header {
+  display: none;
+}
+
+.credits {
+  display: none;
+}
+
+.err {
+  color:#f8f8f2 !important;
+  background-color: #191919 !important;
+}
+
+.highlighter-rouge {
+  padding:0 !important;
+  margin:0 !important;
+}

@@ -1,0 +1,10 @@
+title: Arti Karahoda
+description: Cyber Security & Data Protection
+show_downloads: false
+show_repo: false
+theme: jekyll-theme-midnight
+highlighter: rouge
+github:
+  is_project_page: false
+plugins:
+  - jekyll-seo-tag
