@@ -2,7 +2,7 @@
 title: Arti Karahoda
 layout: default
 image:
-    path: "/assets/images/ak1.jpg"
+    path: "/assets/images/profile.jpg"
 ---
 
 <style>
@@ -15,7 +15,7 @@ section {
 </style>
 # Posts
 ### Research Articles (2019)
-- **November 23, 2019 —** [Ethereum RPC & IPFS / HTB Chainsaw](posts/chainsaw-writeup)
+- **November 23, 2019 —** [Ethereum RPC & IPFS / HTB Chainsaw](posts/htb-chainsaw-writeup)
 
 <span style="color:#4ee44e;">This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum's RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage.</span>
 - **August 1, 2019 —** [Data Protection in Kosovo / Legislation](https://sense.co.com/2019/08/01/data-protection-ks/){:target="_blank"}
