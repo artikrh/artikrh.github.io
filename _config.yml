@@ -4,7 +4,7 @@ show_downloads: false
 show_repo: false
 theme: jekyll-theme-midnight
 highlighter: rouge
-url: artikrh.github.io
+url: https://artikrh.github.io
 google_analytics: UA-151966598-1
 github:
   is_project_page: false
