@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
 
-<!-- Begin Jekyll SEO tag v2.6.1 -->
+    <!-- Begin Jekyll SEO tag v2.6.1 -->
 <title>Arti Karahoda | Cyber Security &amp; Data Protection</title>
 <meta name="generator" content="Jekyll v3.8.6" />
 <meta property="og:title" content="Arti Karahoda" />
@@ -15,8 +15,9 @@
 <link rel="canonical" href="http://localhost:4000/" />
 <meta property="og:url" content="http://localhost:4000/" />
 <meta property="og:site_name" content="Arti Karahoda" />
+<meta property="og:image" content="http://localhost:4000/assets/images/ak1.jpg" />
 <script type="application/ld+json">
-{"@type":"WebSite","url":"http://localhost:4000/","name":"Arti Karahoda","headline":"Arti Karahoda","description":"Cyber Security &amp; Data Protection","@context":"https://schema.org"}</script>
+{"@type":"WebSite","headline":"Arti Karahoda","image":"http://localhost:4000/assets/images/ak1.jpg","url":"http://localhost:4000/","name":"Arti Karahoda","description":"Cyber Security &amp; Data Protection","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
     <link rel="stylesheet" href="/assets/css/style.css?v=">
@@ -28,50 +29,96 @@
     <!--[if lt IE 8]>
     <link rel="stylesheet" href="/assets/css/ie.css">
     <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    
+    <style>
+section #title {
+  padding:0;
+}
+#nav {
+  list-style-type: none !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style-image: none !important;
+}
+
+#nav li {
+  float: left;
+}
+
+#nav li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 8px 8px;
+  text-decoration: none;
+}
+
+#nav li a:hover {
+  background-color: #111;
+}
+
+*:focus {
+  outline:none !important
+}
+    </style>
 
   </head>
   <body>
-      <div id="header">
-        <nav>
-          <li class="fork"><a href="">View On GitHub</a></li>
-          
-        </nav>
-      </div><!-- end header -->
-
     <div class="wrapper">
-
       <section>
         <div id="title">
           <h1>Arti Karahoda</h1>
           <p>Cyber Security & Data Protection</p>
+          <ul id="nav">
+              <li><a href="/">Home</a></li>
+              <li><a href="/#posts">Posts</a></li>
+              <li><a href="/#-whoami">About</a></li>
+              <li><a href="/#contact">Contact</a></li>
+            </ul>
           <hr></div>
 
-        <h1 id="posts">Posts</h1>
-<h3 id="research-2019">Research (2019)</h3>
+        <style>
+#nav {
+    display:none;
+}
+section {
+    padding: 30px 0px 0px 0px;
+}
+</style>
+
+<h1 id="posts">Posts</h1>
+<h3 id="research-articles-2019">Research Articles (2019)</h3>
 <ul>
-  <li><strong>November 9, 2019 —</strong> <a href="posts/chainsaw-writeup">HTB Chainsaw / Ethereum RPC &amp; IPFS</a></li>
-  <li><strong>August 1, 2019 —</strong> <a href="https://sense.co.com/2019/08/01/data-protection-ks/">Data Protection in Kosovo</a></li>
+  <li><strong>November 23, 2019 —</strong> <a href="posts/chainsaw-writeup">Ethereum RPC &amp; IPFS / HTB Chainsaw</a></li>
 </ul>
 
-<h3 id="write-ups-2018">Write-ups (2018)</h3>
+<p><span style="color:#4ee44e;">This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum’s RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage.</span></p>
 <ul>
-  <li><strong>September 30, 2018 —</strong> <a href="assets/pdfs/Access.pdf">Access</a></li>
-  <li><strong>August 28, 2018 —</strong> <a href="assets/pdfs/SecNotes.pdf">SecNotes</a></li>
-  <li><strong>August 26, 2018 —</strong> <a href="assets/pdfs/Dab.pdf">Dab</a></li>
-  <li><strong>August 8, 2018 —</strong> <a href="assets/pdfs/Reddish.pdf">Reddish</a></li>
-  <li><strong>August 7, 2018 —</strong> <a href="assets/pdfs/Waldo.pdf">Waldo</a></li>
-  <li><strong>July 19, 2018 —</strong> <a href="assets/pdfs/Hawk.pdf">Hawk</a></li>
-  <li><strong>June 12, 2018 —</strong> <a href="assets/pdfs/Stratosphere.pdf">Stratosphere</a></li>
-  <li><strong>June 5, 2018 —</strong> <a href="assets/pdfs/Chatterbox.pdf">Chatterbox</a></li>
-  <li><strong>June 2, 2018 —</strong> <a href="assets/pdfs/Celestial.pdf">Celestial</a></li>
-  <li><strong>June 1, 2018 —</strong> <a href="assets/pdfs/Poison.pdf">Poison</a></li>
+  <li><strong>August 1, 2019 —</strong> <a href="https://sense.co.com/2019/08/01/data-protection-ks/" target="_blank">Data Protection in Kosovo / Legislation</a></li>
+</ul>
+
+<p><span style="color:#4ee44e;">In this article, we will make a general overview on how Privacy &amp; Data Protection are defined in Kosovo, as well as an outline on data protection legislation throughout the years, key legal points, and the supervistory authority along its court cases.</span></p>
+
+<h3 id="machine-documentations-2018-pdf">Machine Documentations (2018) [PDF]</h3>
+<ul>
+  <li><strong>September 30, 2018 —</strong> <a href="assets/pdfs/Access.pdf">Access / MDB SQL &amp; Stored Credentials</a></li>
+  <li><strong>August 28, 2018 —</strong> <a href="assets/pdfs/SecNotes.pdf">SecNotes / SQLi &amp; Password Leak</a></li>
+  <li><strong>August 26, 2018 —</strong> <a href="assets/pdfs/Dab.pdf">Dab / Memcached Breach &amp; Shared Library Hijack</a></li>
+  <li><strong>August 8, 2018 —</strong> <a href="assets/pdfs/Reddish.pdf">Reddish / Node-RED, Pivoting &amp; Rsync Abuse</a></li>
+  <li><strong>August 7, 2018 —</strong> <a href="assets/pdfs/Waldo.pdf">Waldo / Local File Inclusion &amp; Linux Capabilities</a></li>
+  <li><strong>July 19, 2018 —</strong> <a href="assets/pdfs/Hawk.pdf">Hawk / AES CBC Bruteforce, Drupal Reverse Shell &amp; H2 Console</a></li>
+  <li><strong>June 12, 2018 —</strong> <a href="assets/pdfs/Stratosphere.pdf">Stratosphere / Apache Struts Attack &amp; Python Library Hijack</a></li>
+  <li><strong>June 5, 2018 —</strong> <a href="assets/pdfs/Chatterbox.pdf">Chatterbox / Achat Buffer Overflow &amp; ACL Modification</a></li>
+  <li><strong>June 2, 2018 —</strong> <a href="assets/pdfs/Celestial.pdf">Celestial / NodeJS Vulnerability &amp; Cronjob Abuse</a></li>
+  <li><strong>June 1, 2018 —</strong> <a href="assets/pdfs/Poison.pdf">Poison / Exposed SSH key &amp; VNC Takeover</a></li>
 </ul>
 
 <h1 id="-whoami">$ whoami</h1>
 
-<p><img style="padding-right: 30px;" width="284" height="284" align="left" src="assets/images/ak1.jpg" />
-<strong>About me:</strong> I am a cybersecurity specialist from Prishtina, Kosovo – and currently working in the field of information security and data protection. I have a computer engineering background from studies and my key technical skills lie in the field of network and mobile security, digital forensics, exploit development and process automation using Python &amp; C++.</p>
+<p><img style="padding-right: 30px;" width="300" height="300" align="left" src="assets/images/profile.jpg" />
+<strong>About me:</strong> I am a cybersecurity specialist—from Prishtina, Kosovo—working in the field of information security and data protection. I have a computer engineering background from studies and my key technical skills lie in network and mobile security, digital forensics, exploit development and process automation using Python &amp; C++.</p>
 
 <ul>
   <li>
@@ -82,23 +129,47 @@
   </li>
 </ul>
 
-<p><strong>Hack the Box:</strong> HTB is an online penetration testing platform with more than 200,000 security researchers from all around the world. My peak rank was the fourth (4th) position globally:</p>
+<p><strong>Hack the Box:</strong> HTB is an online penetration testing platform with more than 200,000 security researchers worldwide. My peak rank was the fourth (4th) position globally:</p>
 
 <p><img src="assets/images/HTB-members-HoF.jpg" /></p>
 
+<h3 id="links">Links</h3>
 <ul>
-  <li><a href="https://www.hackthebox.eu/profile/41600">https://www.hackthebox.eu/profile/41600</a></li>
-  <li><a href="https://github.com/artikrh">https://github.com/artikrh</a></li>
-  <li><a href="https://www.linkedin.com/in/artikarahoda/">https://www.linkedin.com/in/artikarahoda/</a></li>
-  <li><a href="https://cyberacademy.co/hall-of-fame/">https://cyberacademy.co/hall-of-fame/</a></li>
-  <li><a href="https://sense.co.com/cpo_team/arti-karahoda/">https://sense.co.com/cpo_team/arti-karahoda/</a></li>
+  <li><a href="https://www.hackthebox.eu/profile/41600">hackthebox.eu/profile/41600</a></li>
+  <li><a href="https://github.com/artikrh">github.com/artikrh</a></li>
+  <li><a href="https://www.linkedin.com/in/artikarahoda/">linkedin.com/in/artikarahoda/</a></li>
+  <li><a href="https://sense.co.com/cpo_team/arti-karahoda/">sense.co.com/cpo_team/arti-karahoda/</a></li>
+</ul>
+
+<h3 id="mentions">Mentions</h3>
+<ul>
+  <li><a href="https://cacttus.education/cacttus-education-se-bashku-me-cyber-academy-dhe-cacttus-organizuan-panelin-mbi-sigurine-kibernetike/">Cacttus Education / Cyber Security Panel</a></li>
+  <li><a href="https://cyberacademy.co/hall-of-fame/">Cyber Academy / Hall of Fame</a></li>
+  <li><a href="https://sentry.co.com/2019/06/11/cyber-defense-week-2018/">Sentry Cybersecurity / Cyber Defense Week</a></li>
+  <li><a href="https://ipkofoundation.org/wp-content/uploads/2019/01/2017-1st-Round.pdf">IPKO Foundation / Scholarship</a></li>
+</ul>
+
+<h3 id="contact">Contact</h3>
+<ul>
+  <li><a href="https://t.me/artikrh">Telegram: t.me/artikrh</a></li>
+  <li><a href="mailto:arti.kh@protonmail.ch">arti.kh@protonmail.ch</a></li>
+  <li><a href="mailto:arti.karahoda@sense.co.com">arti.karahoda@sense.co.com</a></li>
+  <li><a href="assets/txt/pgp-pub.txt">PGP: 6250 DB1D 7BBB A441 9840 C3EF 096D E9BF 56A0 EBE0</a></li>
 </ul>
 
 
       </section>
-
     </div>
 
+    
+      <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-151966598-1', 'auto');
+        ga('send', 'pageview');
+      </script>
     
   </body>
 </html>

@@ -6,6 +6,10 @@
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
 
     {% seo %}
+    <meta property="og:type" content="article">
+    <meta property='article:author' content='Arti Karahoda'/>
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
     <script src="{{ '/assets/js/respond.js' | relative_url }}"></script>
@@ -16,7 +20,7 @@
     <link rel="stylesheet" href="{{ '/assets/css/ie.css' | relative_url }}">
     <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
-    
+    {% include head.html %}
     <style>
 section #title {
   padding:0;
@@ -49,7 +53,7 @@ section #title {
   outline:none !important
 }
     </style>
-
+  {% include head.html %}
   </head>
   <body>
     <div class="wrapper">
