@@ -1,6 +1,6 @@
 ---
 layout: article
-title: SMS Xombie
+title: Building Android Spyware
 description: Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline numerous functionalities that can be used for such purposes – for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices.
 category: research
 modified: 2019-12-26
