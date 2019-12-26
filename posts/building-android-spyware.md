@@ -535,11 +535,11 @@ Content-Type: application/json
 
 Upon receiving the `smsDump` command, `Fetcher` validates the `SMS_READ` permission and uses `sendData()` to trasmit the complete SMS logs to the PHP script as seen partially in below:
 
-<img src="/assets/images/xombie1.png">
+<img src="/assets/images/xombie1.PNG">
 
 I will use <a href="https://gchq.github.io/CyberChef/" target="_blank">GCHQ's CyberChef</a> to decode data:
 
-<img src="/assets/images/xombie2.png">
+<img src="/assets/images/xombie2.PNG">
 
 # 3. Application Architecture
 ## 3.1. Background Service
