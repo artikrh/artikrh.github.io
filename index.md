@@ -14,15 +14,20 @@ section {
 }
 </style>
 # Posts
-### Research Articles (2019)
+### Research Articles
+- **December 26, 2019 —** [Building Android Spyware / Xombie APK](posts/building-android-spyware)
+
+<span style="color:#4ee44e;">Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline some functionalities that can be used for such purposes and for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices.</span>
+
 - **November 23, 2019 —** [Ethereum RPC & IPFS / HTB Chainsaw](posts/htb-chainsaw-writeup)
 
 <span style="color:#4ee44e;">This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum's RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage.</span>
+
 - **August 1, 2019 —** [Data Protection in Kosovo / Legislation](https://sense.co.com/2019/08/01/data-protection-ks/){:target="_blank"}
 
 <span style="color:#4ee44e;">In this article, we will make a general overview on how Privacy & Data Protection are defined in Kosovo, as well as an outline on data protection legislation throughout the years, key legal points, and the supervistory authority along its court cases.</span>
 
-### Machine Documentations (2018) [PDF]
+### CTF Writeups
 - **September 30, 2018 —** [Access / MDB SQL & Stored Credentials](assets/pdfs/Access.pdf)
 - **August 28, 2018 —** [SecNotes / SQLi & Password Leak](assets/pdfs/SecNotes.pdf)
 - **August 26, 2018 —** [Dab / Memcached Breach & Shared Library Hijack](assets/pdfs/Dab.pdf)
