@@ -59,10 +59,10 @@ section {
 - [sense.co.com/cpo_team/arti-karahoda/](https://sense.co.com/cpo_team/arti-karahoda/)
 
 ### Mentions
+- [Wallencore / XOR Regional CTF](https://wallencore.com/wallencore-awards-certificates-of-achievement-to-xorctf74e-2020-contest-winners/)
 - [Cacttus Education / Cyber Security Panel](https://cacttus.education/cacttus-education-se-bashku-me-cyber-academy-dhe-cacttus-organizuan-panelin-mbi-sigurine-kibernetike/)
-- [Cyber Academy / Hall of Fame](https://cyberacademy.co/hall-of-fame/)
+- [Cyber Academy / Hall of Fame](https://cyberacademy.co/#alumnitext)
 - [Sentry Cybersecurity / Cyber Defense Week](https://sentry.co.com/2019/06/11/cyber-defense-week-2018/)
-- [IPKO Foundation / Scholarship](https://ipkofoundation.org/wp-content/uploads/2019/01/2017-1st-Round.pdf)
 
 ### Contact
 - [arti.kh@protonmail.ch](mailto:arti.kh@protonmail.ch)
