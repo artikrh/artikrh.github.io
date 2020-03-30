@@ -15,6 +15,10 @@ section {
 </style>
 # Posts
 ### Research Articles
+- **March 30, 2020 —** [Weevely Backdoor Analysis / Blue Team DFIR](posts/weevely-backdoor-analysis)
+
+<span style="color:#4ee44e;">Weevely is a powerful polymorphic backdoor used in web post-explonation phases; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it's communication chain and encryption scheme in order to assist blue team operators during a DFIR process.</span>
+
 - **December 26, 2019 —** [Building Android Spyware / Xombie APK](posts/building-android-spyware)
 
 <span style="color:#4ee44e;">Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline some functionalities that can be used for such purposes and for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices.</span>
@@ -41,8 +45,9 @@ section {
 
 # $ whoami
 
-<img style="padding-right: 30px;" width="300" height="300" align="left" src="assets/images/profile.jpg">
-**About me:** I am a cybersecurity specialist—from Prishtina, Kosovo—working in the field of information security and data protection. I have a computer engineering background from studies and my key technical skills lie in network and mobile security, digital forensics, exploit development and process automation using Python & C++.
+<img style="padding-right: 30px;" align="left" style="margin-bottom:1em;" src="assets/images/cover_2.jpg">
+
+**About me:** I am a cybersecurity specialist—from Prishtina, Kosovo—working in the field of information security and data protection. I have a computer engineering background from studies and my key technical skills include network and mobile security, digital forensics, exploit development and process automation using Python & C++.
 
 - **Capture the Flag:** I occasionally partake in CTF global events with a main focus on web, cryptography and steganography.
 
