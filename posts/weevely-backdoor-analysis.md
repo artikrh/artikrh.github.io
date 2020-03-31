@@ -1,7 +1,7 @@
 ---
 layout: article
 title: Weevely Backdoor Analysis
-description: Weevely is a powerful polymorphic backdoor used in web post-explonation phases; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it's communication chain and encryption scheme in order to assist blue team operators during a DFIR process.
+description: Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it's communication chain and encryption scheme in order to assist blue team operators during a DFIR process.
 category: research
 modified: 2020-03-30
 tags: [web, backdoor, php, analysis, yara]
@@ -293,7 +293,7 @@ echo decrypt($argv[1],$k,$kh,$kf);
 function decrypt($data,$k,$kh,$kf){
     $data = peel($data,$kh,$kf);
 	
-	$first = base64_decode($data);
+    $first = base64_decode($data);
     $second = x($first,$k);
     $third = gzuncompress($second);
     return $third;
