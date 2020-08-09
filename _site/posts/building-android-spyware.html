@@ -5,6 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
 
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
     <!-- Begin Jekyll SEO tag v2.6.1 -->
 <title>Building Android Spyware | Arti Karahoda</title>
 <meta name="generator" content="Jekyll v3.8.6" />
@@ -22,8 +25,7 @@
 
     <meta property="og:type" content="article">
     <meta property='article:author' content='Arti Karahoda'/>
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+
     <link rel="stylesheet" href="/assets/css/style.css?v=">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
     <script src="/assets/js/respond.js"></script>
@@ -860,7 +862,7 @@ Content-Type: application/json
 The controller device sends a command through an SMS message to retrieve all of the mobile phones geographical location (<code class="highlighter-rouge">getGeoLocation</code> keyword). The <a href="https://www.amazon.com/Walmeck-SIM900-Development-Raspberry-Android/dp/B07KS7ZNYD" target="_blank">GSM shield</a>, which can operate in Quad 850/900/1800/1900 MHz frequency bands, uses a local SIM card to receive the message, forward the SMS content to the <code class="highlighter-rouge">smsXlib</code> library, which then queues the task to the hosting server. Considering the mobile devices sends HTTP requests periodically to check whether there is something to do, in this case, they would immediately send relevant latitude and longitude values as a POST request (given that the user has given the application location service permission).</p>
 
 <h1 id="5-disclaimer">5. Disclaimer</h1>
-<p><i><b>Legal disclaimer:</b> Usage of this application for attacking targets without prior mutual consent is illegal. It is the end user’s responsibility to obey all applicable local, state and federal laws. I assume no liability and are not responsible for any misuse or damage caused.</i></p>
+<p><i><b>Disclaimer:</b> Usage of this application for attacking targets without prior mutual consent is illegal. It is the end user’s responsibility to obey all applicable local, state and federal laws. I assume no liability and I am not responsible for any misuse or damage caused.</i></p>
 
 <p><i><a href="../">Go back to homepage</a></i></p>
 

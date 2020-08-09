@@ -614,6 +614,6 @@ A typical use case would consist of the following process as shown below:
 The controller device sends a command through an SMS message to retrieve all of the mobile phones geographical location (`getGeoLocation` keyword). The <a href="https://www.amazon.com/Walmeck-SIM900-Development-Raspberry-Android/dp/B07KS7ZNYD" target="_blank">GSM shield</a>, which can operate in Quad 850/900/1800/1900 MHz frequency bands, uses a local SIM card to receive the message, forward the SMS content to the `smsXlib` library, which then queues the task to the hosting server. Considering the mobile devices sends HTTP requests periodically to check whether there is something to do, in this case, they would immediately send relevant latitude and longitude values as a POST request (given that the user has given the application location service permission).
 
 # 5. Disclaimer
-<i><b>Legal disclaimer:</b> Usage of this application for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. I assume no liability and are not responsible for any misuse or damage caused.</i>
+<i><b>Disclaimer:</b> Usage of this application for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. I assume no liability and I am not responsible for any misuse or damage caused.</i>
 
 <i>[Go back to homepage](../)</i>
