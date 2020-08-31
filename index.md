@@ -15,6 +15,10 @@ section {
 </style>
 # Blog Feed
 ### Technical Articles
+- **September 07, 2020** — [Evading AVs with Network Sockets / Shell & Keylogger](posts/av-evasion-network-sockets)
+
+<span style="color:#4ee44e;">Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a primitive but functional remote 'shell' with keylogging capabilities against a fully up-to-date Windows Defender.</span>
+
 - **March 30, 2020 —** [Weevely Backdoor Analysis / Blue Team DFIR](posts/weevely-backdoor-analysis)
 
 <span style="color:#4ee44e;">Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it's communication chain and encryption scheme in order to assist blue team operators during a DFIR process.</span>
@@ -63,9 +67,10 @@ section {
 <img src="assets/images/HTB-members-HoF.jpg">
 
 ### Mentions
+- [University of Business and Technology / Cyber Security Week Lecturer](assets/pdfs/UBT_Cyber-Resilience.pdf)
 - [ICTSmedia / Albanian ICT Awards VIII](https://ictawards.org/2019/edicioni-i-8-te-i-ict-awards-ndan-cmimet-per-historite-shqiptare-te-suksesit-ne-teknologji/)
 - [Wallencore / XOR Regional CTF](https://wallencore.com/wallencore-awards-certificates-of-achievement-to-xorctf74e-2020-contest-winners/)
-- [Cacttus Education / Cyber Security Panel](https://cacttus.education/cacttus-education-se-bashku-me-cyber-academy-dhe-cacttus-organizuan-panelin-mbi-sigurine-kibernetike/)
+- [Cacttus Education / Cyber Security Panel Speaker](https://cacttus.education/cacttus-education-se-bashku-me-cyber-academy-dhe-cacttus-organizuan-panelin-mbi-sigurine-kibernetike/)
 - [Cyber Academy / Hall of Fame](https://cyberacademy.co/#alumnitext)
 - [Sentry Cybersecurity / Cyber Defense Week](https://sentry.co.com/2019/06/11/cyber-defense-week-2018/)
 

