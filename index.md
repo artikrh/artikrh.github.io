@@ -1,8 +1,9 @@
 ---
 title: Arti Karahoda
+description: Blog on Cyber Security & Data Protection
 layout: default
 image:
-    path: "/assets/images/profile.jpg"
+    path: "/assets/images/cover_2.jpg"
 ---
 
 <style>
@@ -15,7 +16,7 @@ section {
 </style>
 # Blog Feed
 ### Technical Articles
-- **August 31, 2020** — [Evading AV with Network Sockets / Shell & Keylogger](posts/av-evasion-network-sockets)
+- **August 31, 2020 —**  [Evading AV with Network Sockets / Shell & Keylogger](posts/av-evasion-network-sockets)
 
 <span style="color:#4ee44e;">Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote 'shell' with keylogging capabilities against a fully up-to-date Windows Defender.</span>
 

@@ -200,7 +200,7 @@ body .gist .pl-iu {
 <i>**31 August, 2020** — [Go back to homepage](../)</i>
 # Evading AV with Network Sockets / Shell & Keylogger
 
-RAT trojans typically use WinAPI functions for injecting malicious shellcode in memory (RAM) which is then executed. While there are numerous methods of evading anti-malware or EDR solutions for such RATs that reside in disk using techniques such as partial code encryption, they can still be caught during runtime as a result of vendors using behaviour analysis through machine learning for exploit prevention. Such controlls are difficult to bypass, however, instead of leveraging WinAPI calls this time, sometimes simplicity is key.
+RAT trojans typically use WinAPI functions for injecting malicious shellcode in memory (RAM) which is then executed. While there are numerous methods of evading anti-malware or EDR solutions for such RATs that reside in disk using techniques such as partial code encryption, they can still be caught during runtime as a result of vendors using behaviour analysis through machine learning for exploit prevention. Such controls are difficult to bypass, however, instead of leveraging WinAPI calls this time, sometimes simplicity is key.
 
 A network socket is an endpoint of a two-way communication (TCP or UDP), identified by an IP address and a port number, which is used to send or receive data within a node on a computer network (could be LAN, WAN). They have a wide range of use cases, usually in a client-server architecture such as basic chat applications. A lot of programming languages implement libraries for programming sockets, and in this case, I will be using Java considering that it can be complied to bytecode in almost all operating systems which have JVM. Furthermore, its compile logic makes most of the Java applications seem legitimate, such as our case in programming a RAT trojan with a simple keylogging capability.
 
@@ -246,7 +246,7 @@ To add keylogging capabilities in real-time through sockets, I used the [log4j](
 
 <script src="https://gist.github.com/artikrh/9fe78a9c3ecca773be4ab8e4f200c043.js"></script>
 
-Compiling this Java program into a Windows Excecutable comprises of convering `.jar` to `.exe` using [various tools](https://stackoverflow.com/questions/2011664/compiling-a-java-program-into-an-executable), however, I will be using the IntelliJ IDE to [directly build a binary artifact](https://www.youtube.com/watch?v=_KHCHiH2RZ0) and run the program along a fully up-to-date Windows Defender. The `klon` keyword will triger the keylogging capability, whereas `kloff` will stop the key listener:
+Compiling this Java program into a Windows executable comprises of converting `.jar` to `.exe` using [various tools](https://stackoverflow.com/questions/2011664/compiling-a-java-program-into-an-executable), however, I will be using the IntelliJ IDE to [directly build a binary artifact](https://www.youtube.com/watch?v=_KHCHiH2RZ0) and run the program along a fully up-to-date Windows Defender. The `klon` keyword will trigger the keylogging capability, whereas `kloff` will stop the key listener:
 
 ![Proof of Concept](/assets/images/Keylogger.png)
 
