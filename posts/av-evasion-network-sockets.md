@@ -1,14 +1,15 @@
 ---
 layout: article
-title: Evading AV with Network Sockets / Shell & Keylogger
+title: Evading AV with Network Sockets / Keylogger RAT
 description: Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote 'shell' with keylogging capabilities against a fully up-to-date Windows Defender.
 category: research
-modified: 2020-08-31
+modified: 31 August, 2020
 tags: [java, keylogger, evasion, sockets]
 image:
     path: "/assets/images/Keylogger2.png"
 ---
 
+<link rel="stylesheet" href="/assets/css/github.css">
 <style>
 .wrapper {
   max-width: 700px;
@@ -48,161 +49,14 @@ pre, code {
 .highlighter-rouge {
     color: cyan;
 }
-body .gist .highlight {
-    background: #272822;
-}
-
-body .gist .blob-num,
-body .gist .blob-code-inner,
-body .gist .pl-s2,
-body .gist .pl-stj {
-    color: #f8f8f2;
-}
-body .gist .pl-c1 {
-    color: #ae81ff;
-}
-body .gist .pl-enti {
-    color: #a6e22e;
-    font-weight: 700;
-}
-body .gist .pl-st {
-    color: #66d9ef;
-}
-body .gist .pl-mdr {
-    color: #66d9ef;
-    font-weight: 400;
-}
-body .gist .pl-ms1 {
-    background: #fd971f;
-}
-body .gist .pl-c,
-body .gist .pl-c span,
-body .gist .pl-pdc {
-    color: #75715e;
-    font-style: italic;
-}
-body .gist .pl-cce,
-body .gist .pl-cn,
-body .gist .pl-coc,
-body .gist .pl-enc,
-body .gist .pl-ens,
-body .gist .pl-kos,
-body .gist .pl-kou,
-body .gist .pl-mh .pl-pdh,
-body .gist .pl-mp,
-body .gist .pl-mp1 .pl-sf,
-body .gist .pl-mq,
-body .gist .pl-pde,
-body .gist .pl-pse,
-body .gist .pl-pse .pl-s2,
-body .gist .pl-mp .pl-s3,
-body .gist .pl-smi,
-body .gist .pl-stp,
-body .gist .pl-sv,
-body .gist .pl-v,
-body .gist .pl-vi,
-body .gist .pl-vpf,
-body .gist .pl-mri,
-body .gist .pl-va,
-body .gist .pl-vpu {
-    color: #66d9ef;
-}
-body .gist .pl-cos,
-body .gist .pl-ml,
-body .gist .pl-pds,
-body .gist .pl-s,
-body .gist .pl-s1,
-body .gist .pl-sol {
-    color: #e6db74;
-}
-body .gist .pl-e,
-body .gist .pl-ef,
-body .gist .pl-en,
-body .gist .pl-enf,
-body .gist .pl-enm,
-body .gist .pl-entc,
-body .gist .pl-entm,
-body .gist .pl-eoac,
-body .gist .pl-eoac .pl-pde,
-body .gist .pl-eoi,
-body .gist .pl-mai .pl-sf,
-body .gist .pl-mm,
-body .gist .pl-pdv,
-body .gist .pl-som,
-body .gist .pl-sr,
-body .gist .pl-vo {
-    color: #a6e22e;
-}
-body .gist .pl-ent,
-body .gist .pl-eoa,
-body .gist .pl-eoai,
-body .gist .pl-eoai .pl-pde,
-body .gist .pl-k,
-body .gist .pl-ko,
-body .gist .pl-kolp,
-body .gist .pl-mc,
-body .gist .pl-mr,
-body .gist .pl-ms,
-body .gist .pl-s3,
-body .gist .pl-smc,
-body .gist .pl-smp,
-body .gist .pl-sok,
-body .gist .pl-sra,
-body .gist .pl-src,
-body .gist .pl-sre {
-    color: #f92672;
-}
-body .gist .pl-mb,
-body .gist .pl-pdb {
-    color: #e6db74;
-    font-weight: 700;
-}
-body .gist .pl-mi,
-body .gist .pl-pdi {
-    color: #f92672;
-    font-style: italic;
-}
-body .gist .pl-pdc1,
-body .gist .pl-scp {
-    color: #ae81ff;
-}
-body .gist .pl-sc,
-body .gist .pl-sf,
-body .gist .pl-mo,
-body .gist .pl-entl {
-    color: #fd971f;
-}
-body .gist .pl-mi1,
-body .gist .pl-mdht {
-    color: #a6e22e;
-    background: rgba(0, 64, 0, .5);
-}
-body .gist .pl-md,
-body .gist .pl-mdhf {
-    color: #f92672;
-    background: rgba(64, 0, 0, .5);
-}
-body .gist .pl-mdh,
-body .gist .pl-mdi {
-    color: #a6e22e;
-    font-weight: 400;
-}
-body .gist .pl-ib,
-body .gist .pl-id,
-body .gist .pl-ii,
-body .gist .pl-iu {
-    background: #a6e22e;
-    color: #272822;
-}
-
 </style>   
 
-<i>**31 August, 2020** — [Go back to homepage](../)</i>
-# Evading AV with Network Sockets / Shell & Keylogger
+<i>**{{page.modified}}** — [Go back to homepage](../)</i>
+# {{page.title}}
 
 RAT trojans typically use WinAPI functions for injecting malicious shellcode in memory (RAM) which is then executed. While there are numerous methods of evading anti-malware or EDR solutions for such RATs that reside in disk using techniques such as partial code encryption, they can still be caught during runtime as a result of vendors using behaviour analysis through machine learning for exploit prevention. Such controls are difficult to bypass, however, instead of leveraging WinAPI calls this time, sometimes simplicity is key.
 
-A network socket is an endpoint of a two-way communication (TCP or UDP), identified by an IP address and a port number, which is used to send or receive data within a node on a computer network (could be LAN, WAN). They have a wide range of use cases, usually in a client-server architecture such as basic chat applications. A lot of programming languages implement libraries for programming sockets, and in this case, I will be using Java considering that it can be complied to bytecode in almost all operating systems which have JVM. Furthermore, its compile logic makes most of the Java applications seem legitimate, such as our case in programming a RAT trojan with a simple keylogging capability.
+A network socket is an endpoint of a two-way communication (TCP or UDP), identified by an IP address and a port number, which is used to send or receive data within a node on a computer network (could be LAN, WAN). They have a wide range of use cases, usually in a client-server architecture such as basic chat applications. A lot of programming languages implement libraries for programming sockets, and in this case, I will be using Java considering that it can be compiled to bytecode in almost all operating systems which have JVM. Furthermore, its compile logic makes most of the Java applications seem legitimate, such as our case in programming a RAT trojan with a simple keylogging capability.
 
 Unfortunately, in comparison with Python, Java requires more lines of code for using sockets. For demonstration purposes, I will be using one of my VPS servers as the listener IP address of `185.141.61.227`, which can be written in decimal format as `"3113041379"` thanks to [IP-Obfuscator.py](https://github.com/C-REMO/Obscure-IP-Obfuscator):
 

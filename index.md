@@ -16,7 +16,11 @@ section {
 </style>
 # Blog Feed
 ### Technical Articles
-- **August 31, 2020 —**  [Evading AV with Network Sockets / Shell & Keylogger](posts/av-evasion-network-sockets)
+- **COMING SOON —**  [Evading AV with XLM Macros / Microsoft Excel](#)
+
+<span style="color:#4ee44e;">A malicious Office document (Word/Excel) is one of the most common vector of attacks that is highly effective when combined with the right social engineering techniques. This is due to the versatile nature of VBA/XLM scripts which can be used for deploying malware when executed. This post will take a deep dive for the old-school Excel 4.0 macros.</span>
+
+- **August 31, 2020 —**  [Evading AV with Network Sockets / Keylogger RAT](posts/av-evasion-network-sockets)
 
 <span style="color:#4ee44e;">Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote 'shell' with keylogging capabilities against a fully up-to-date Windows Defender.</span>
 
@@ -41,7 +45,7 @@ section {
 
 <span style="color:#4ee44e;">A general outline on how Privacy & Data Protection are defined in Kosovo as well as data protection legislation throughout the years, key legal points, and the supervistory authority along its top court cases.</span>
 
-### CTF Writeups
+### Capture the Flag Writeups
 - **September 30, 2018 —** [Access / MDB SQL & Stored Credentials](assets/pdfs/Access.pdf)
 - **August 28, 2018 —** [SecNotes / SQLi & Password Leak](assets/pdfs/SecNotes.pdf)
 - **August 26, 2018 —** [Dab / Memcached Breach & Shared Library Hijack](assets/pdfs/Dab.pdf)
@@ -57,7 +61,7 @@ section {
 
 <img style="padding-right: 30px;" align="left" style="margin-bottom:1em;" src="assets/images/cover_2.jpg">
 
-**About me:** I am a cybersecurity specialist—from Prishtina, Kosovo—working in the field of information security and data protection. I have a computer engineering background from studies and my key technical skills include network and mobile security, digital forensics, exploit development and process automation using Python & C++.
+**About me:** I am a cybersecurity specialist—from Prishtina, Kosovo—working in the field of information security and data protection. I have a computer engineering background from studies and my key technical skills lie in network and mobile security, digital forensics, malware development and process automation using Python & C++.
 
 - **Capture the Flag:** I occasionally partake in CTF global events with a main focus on web, cryptography and steganography.
 
