@@ -16,11 +16,11 @@ section {
 </style>
 # Blog Feed
 ### Technical Articles
-- **COMING SOON —**  [Evading AV with XLM Macros / Microsoft Excel](#)
+- **COMING SOON —** Evading AV with XLM Macros / Microsoft XLS
 
 <span style="color:#4ee44e;">A malicious Office document (Word/Excel) is one of the most common vector of attacks that is highly effective when combined with the right social engineering techniques. This is due to the versatile nature of VBA/XLM scripts which can be used for deploying malware when executed. This post will take a deep dive for the old-school Excel 4.0 macros.</span>
 
-- **August 31, 2020 —**  [Evading AV with Network Sockets / Keylogger RAT](posts/av-evasion-network-sockets)
+- **August 31, 2020 —** [Evading AV with Network Sockets / Keylogger RAT](posts/av-evasion-network-sockets)
 
 <span style="color:#4ee44e;">Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote 'shell' with keylogging capabilities against a fully up-to-date Windows Defender.</span>
 
