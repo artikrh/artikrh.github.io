@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
-    <!-- Begin Jekyll SEO tag v2.6.1 -->
+    <!-- Begin Jekyll SEO tag v2.7.1 -->
 <title>Evading AV with XLM Macros / Microsoft Excel | Arti Karahoda</title>
 <meta name="generator" content="Jekyll v3.9.0" />
 <meta property="og:title" content="Evading AV with XLM Macros / Microsoft Excel" />
@@ -15,8 +15,11 @@
 <meta property="og:url" content="https://artikrh.github.io/posts/av-evasion-xlm-macros.html" />
 <meta property="og:site_name" content="Arti Karahoda" />
 <meta property="og:image" content="https://artikrh.github.io/assets/images/xlm-macros.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://artikrh.github.io/assets/images/xlm-macros.png" />
+<meta property="twitter:title" content="Evading AV with XLM Macros / Microsoft Excel" />
 <script type="application/ld+json">
-{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/xlm-macros.png","url":"https://artikrh.github.io/posts/av-evasion-xlm-macros.html","description":"A malicious Office document (Word/Excel) is one of the most common vector of attacks that is highly effective when combined with the right social engineering techniques. This is due to the versatile nature of VBA/XLM scripts which can be used for deploying malware when executed. This post will take a deep dive for the old-school Excel 4.0 macros","headline":"Evading AV with XLM Macros / Microsoft Excel","@context":"https://schema.org"}</script>
+{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/xlm-macros.png","url":"https://artikrh.github.io/posts/av-evasion-xlm-macros.html","headline":"Evading AV with XLM Macros / Microsoft Excel","description":"A malicious Office document (Word/Excel) is one of the most common vector of attacks that is highly effective when combined with the right social engineering techniques. This is due to the versatile nature of VBA/XLM scripts which can be used for deploying malware when executed. This post will take a deep dive for the old-school Excel 4.0 macros","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
     <meta property="og:image:width" content="1200" />
@@ -168,11 +171,27 @@ section #title {
 }
 
 #nav li:not(:last-of-type) {
-  margin: 0 5px;
+  margin: 0;
 }
 
 #nav li:last-of-type {
     margin-left: auto;
+}
+
+#paypal {
+  background-image: url('/assets/images/paypal.jpg'); 
+  background-repeat: no-repeat; 
+  background-size: contain; 
+  background-position: center;
+}
+
+@media screen and (max-width: 767px) {
+  #paypal {
+  background-image: url('/assets/images/paypal.png'); 
+  background-repeat: no-repeat; 
+  background-size: contain; 
+  background-position: center;
+}
 }
 
 *:focus {
@@ -285,7 +304,7 @@ btn.on('click', function(e) {
               <li><a class="blk" href="/#posts">Posts</a></li>
               <li><a class="blk" href="/#-whoami">About</a></li>
               <li><a class="blk" href="/#contact">Contact</a></li>
-              <li style="background-image: url('/assets/images/paypal.jpg'); background-repeat: no-repeat; background-size: contain; background-position: center;"><a href="https://www.paypal.com/paypalme/artikrh" target="_blank">‎‎‎‎‎‎‎‎‎　　　　　</a></li>
+              <li id="paypal"><a href="https://www.paypal.com/paypalme/artikrh" target="_blank">‎‎‎‎‎‎‎‎‎　　　　　</a></li>
             </ul>
           <hr></div>
 

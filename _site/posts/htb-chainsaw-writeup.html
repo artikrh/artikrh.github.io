@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
-    <!-- Begin Jekyll SEO tag v2.6.1 -->
+    <!-- Begin Jekyll SEO tag v2.7.1 -->
 <title>Chainsaw Writeup | Arti Karahoda</title>
 <meta name="generator" content="Jekyll v3.9.0" />
 <meta property="og:title" content="Chainsaw Writeup" />
@@ -15,8 +15,11 @@
 <meta property="og:url" content="https://artikrh.github.io/posts/htb-chainsaw-writeup.html" />
 <meta property="og:site_name" content="Arti Karahoda" />
 <meta property="og:image" content="https://artikrh.github.io/assets/images/chainsaw3.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://artikrh.github.io/assets/images/chainsaw3.png" />
+<meta property="twitter:title" content="Chainsaw Writeup" />
 <script type="application/ld+json">
-{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/chainsaw3.png","url":"https://artikrh.github.io/posts/htb-chainsaw-writeup.html","description":"This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum’s RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage.","headline":"Chainsaw Writeup","@context":"https://schema.org"}</script>
+{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/chainsaw3.png","url":"https://artikrh.github.io/posts/htb-chainsaw-writeup.html","headline":"Chainsaw Writeup","description":"This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum’s RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
     <meta property="og:image:width" content="1200" />
@@ -168,11 +171,27 @@ section #title {
 }
 
 #nav li:not(:last-of-type) {
-  margin: 0 5px;
+  margin: 0;
 }
 
 #nav li:last-of-type {
     margin-left: auto;
+}
+
+#paypal {
+  background-image: url('/assets/images/paypal.jpg'); 
+  background-repeat: no-repeat; 
+  background-size: contain; 
+  background-position: center;
+}
+
+@media screen and (max-width: 767px) {
+  #paypal {
+  background-image: url('/assets/images/paypal.png'); 
+  background-repeat: no-repeat; 
+  background-size: contain; 
+  background-position: center;
+}
 }
 
 *:focus {
@@ -285,7 +304,7 @@ btn.on('click', function(e) {
               <li><a class="blk" href="/#posts">Posts</a></li>
               <li><a class="blk" href="/#-whoami">About</a></li>
               <li><a class="blk" href="/#contact">Contact</a></li>
-              <li style="background-image: url('/assets/images/paypal.jpg'); background-repeat: no-repeat; background-size: contain; background-position: center;"><a href="https://www.paypal.com/paypalme/artikrh" target="_blank">‎‎‎‎‎‎‎‎‎　　　　　</a></li>
+              <li id="paypal"><a href="https://www.paypal.com/paypalme/artikrh" target="_blank">‎‎‎‎‎‎‎‎‎　　　　　</a></li>
             </ul>
           <hr></div>
 
