@@ -45,8 +45,27 @@ section #title {
   text-decoration: none;
 }
 
-#nav li a:hover {
+.blk:hover {
   background-color: #111;
+}
+
+#nav {
+    display: -webkit-flex;
+    display: -ms-flex;
+    display: flex;
+}
+
+#nav li {
+    display: inline-block;
+    list-style: none;
+}
+
+#nav li:not(:last-of-type) {
+  margin: 0 5px;
+}
+
+#nav li:last-of-type {
+    margin-left: auto;
 }
 
 *:focus {
@@ -62,10 +81,11 @@ section #title {
           <h1>{{ site.title}}</h1>
           <p>{{ site.description}}</p>
           <ul id="nav">
-              <li><a href="/">Home</a></li>
-              <li><a href="/#posts">Posts</a></li>
-              <li><a href="/#-whoami">About</a></li>
-              <li><a href="/#contact">Contact</a></li>
+              <li><a class="blk" href="/">Home</a></li>
+              <li><a class="blk" href="/#posts">Posts</a></li>
+              <li><a class="blk" href="/#-whoami">About</a></li>
+              <li><a class="blk" href="/#contact">Contact</a></li>
+              <li style="background-image: url('/assets/images/paypal.jpg'); background-repeat: no-repeat; background-size: contain; background-position: center;"><a href="https://www.paypal.com/paypalme/artikrh" target="_blank">‎‎‎‎‎‎‎‎‎　　　　　</a></li>
             </ul>
           <hr></div>
 
