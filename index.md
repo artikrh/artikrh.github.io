@@ -17,7 +17,7 @@ section {
 
 # Blog Feed
 ### Technical Articles
-- **COMING SOON —** Evading AV with XLM Macros / Microsoft XLS
+- **COMING SOON —** Evading AV with XLM Macros / Microsoft Excel
 
 <span style="color:#4ee44e;">A malicious Office document (Word/Excel) is one of the most common vector of attacks that is highly effective when combined with the right social engineering techniques. This is due to the versatile nature of VBA/XLM scripts which can be used for deploying malware when executed. This post will take a deep dive for the old-school Excel 4.0 macros.</span>
 
