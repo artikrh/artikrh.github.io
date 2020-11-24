@@ -13,40 +13,63 @@ image:
 section {
     padding: 30px 0px 0px 0px;
 }
+ul {
+  list-style-position: inside;
+  padding-left: 0;
+}
 </style>
 
 # Blog Feed
-### Technical Articles
-- **COMING SOON —** Evading AV with XLM Macros / Microsoft Excel
+### 1. Technical Articles  
+<br>
+<a href="posts/av-evasion-network-sockets"><img src="/assets/images/Keylogger2.png"></a>
+[Evading AV with Network Sockets / Keylogger RAT](posts/av-evasion-network-sockets)  
 
-<span style="color:#4ee44e;">A malicious Office document (Word/Excel) is one of the most common vector of attacks that is highly effective when combined with the right social engineering techniques. This is due to the versatile nature of VBA/XLM scripts which can be used for deploying malware when executed. This post will take a deep dive for the old-school Excel 4.0 macros.</span>
-
-- **August 31, 2020 —** [Evading AV with Network Sockets / Keylogger RAT](posts/av-evasion-network-sockets)
-
+<span style="color:#A9A9A9;font-size:90%"><b>August 31, 2020 — </b></span> 
 <span style="color:#4ee44e;">Compiling and running an unsigned Windows executable and hoping for a remote command session without any detection is a difficult task to achieve, however, sometimes there are easier ways of bypassing AVs. This article will outline a simple but functional remote 'shell' with keylogging capabilities against a fully up-to-date Windows Defender.</span>
 
-- **March 30, 2020 —** [Weevely Backdoor Analysis / Blue Team DFIR](posts/weevely-backdoor-analysis)
+<hr>
 
+<a href="posts/weevely-backdoor-analysis"><img src="/assets/images/weevely.png"></a>
+[Weevely Backdoor Analysis / Blue Team DFIR](posts/weevely-backdoor-analysis)  
+
+<span style="color:#A9A9A9;font-size:90%"><b>March 30, 2020 — </b></span> 
 <span style="color:#4ee44e;">Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it's communication chain and encryption scheme in order to assist blue team operators during a DFIR process.</span>
 
-- **December 26, 2019 —** [Building Android Spyware / Xombie APK](posts/building-android-spyware)
+<hr>
 
+<a href="posts/building-android-spyware"><img src="/assets/images/xombie.jpg"></a>
+[Building Android Spyware / Xombie APK](posts/building-android-spyware)  
+
+<span style="color:#A9A9A9;font-size:90%"><b>December 26, 2019 — </b></span> 
 <span style="color:#4ee44e;">Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline some functionalities that can be used for such purposes and for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices.</span>
 
-- **November 23, 2019 —** [Ethereum RPC & IPFS / HTB Chainsaw](posts/htb-chainsaw-writeup)
+<hr>
 
+<a href="posts/htb-chainsaw-writeup"><img src="/assets/images/chainsaw3.png"></a>
+[Ethereum RPC & IPFS / HTB Chainsaw](posts/htb-chainsaw-writeup)  
+
+<span style="color:#A9A9A9;font-size:90%"><b>November 23, 2019 — </b></span> 
 <span style="color:#4ee44e;">This article will demonstrate a new vector of attack using Blockchain tools, commencing from an initial CMD injection through Ethereum's RPC interface, SSH keys retrieval using the IPFS protocol, privilege escalation by stealing funds from a smart contract, and file system forensics in the slack space storage.</span>
 
-### Sense Cyber Research Center
-- **May 1, 2020 —** [A Look Inside Banka Ekonomike's Data Breach](https://sense.co.com/2020/05/01/banka-ekonomike-rks-breach/){:target="_blank"}
+<hr>
 
+### 2. Sense Cyber Research Center
+[Cybersecurity Awareness Month #BeCyberSmart](https://sense.co.com/2020/10/31/cybersecurity-awareness-month/){:target="_blank"}  
+<span style="color:#A9A9A9;font-size:90%"><b>October 31, 2020 — </b></span> 
+<span style="color:#4ee44e;">This article is part of #NCSAM20 to help protect entities from online fraud and malware. It outlines key cyber-threats and their respective counter-measures in terms of safety tips – relevant to both individuals and businesses during the COVID-19 era.</span>
+
+[A Look Inside Banka Ekonomike's Data Breach](https://sense.co.com/2020/05/01/banka-ekonomike-rks-breach/){:target="_blank"}  
+<span style="color:#A9A9A9;font-size:90%"><b>May 1, 2020 — </b></span> 
 <span style="color:#4ee44e;">A comprehensive overview of the data breach incident at Banka Ekonomike in Kosovo by the DoppelPaymer ransomware. What information has been compromised, who is the entity behind the cyber-attack, and what are the key corporate security lessons?</span>
 
-- **August 1, 2019 —** [Data Protection in Kosovo](https://sense.co.com/2019/08/01/data-protection-ks/){:target="_blank"}
-
+[Data Protection in Kosovo](https://sense.co.com/2019/08/01/data-protection-ks/){:target="_blank"}  
+<span style="color:#A9A9A9;font-size:90%"><b>August 1, 2019 — </b></span> 
 <span style="color:#4ee44e;">A general outline on how Privacy & Data Protection are defined in Kosovo as well as data protection legislation throughout the years, key legal points, and the supervistory authority along its top court cases.</span>
 
-### Capture the Flag Writeups
+<hr>
+
+### 3. Capture the Flag Writeups
 - **September 30, 2018 —** [Access / MDB SQL & Stored Credentials](assets/pdfs/Access.pdf)
 - **August 28, 2018 —** [SecNotes / SQLi & Password Leak](assets/pdfs/SecNotes.pdf)
 - **August 26, 2018 —** [Dab / Memcached Breach & Shared Library Hijack](assets/pdfs/Dab.pdf)
@@ -58,25 +81,27 @@ section {
 - **June 2, 2018 —** [Celestial / NodeJS Vulnerability & Cronjob Abuse](assets/pdfs/Celestial.pdf)
 - **June 1, 2018 —** [Poison / Exposed SSH key & VNC Takeover](assets/pdfs/Poison.pdf)
 
+<hr>
+
 # $ whoami
 
 <img style="padding-right: 30px;" align="left" style="margin-bottom:1em;" src="assets/images/cover_2.jpg">
 
-**About me:** I am a cybersecurity specialist—from Prishtina, Kosovo—working in the field of information security and data protection. I have a computer engineering background from studies and my key technical skills lie in network and mobile security, digital forensics, malware development and process automation using Python & C++.
+**About me:** I am a Cybersecurity Specialist—from Prishtina, Kosovo—working in the field of Information Security and Data Protection. I completed my studies in Computer Engineering, Computer Networks, and Cyber Security. My key technical skills lie in enterprise security, network and mobile security, digital forensics, malware development and process automation using Python & C/C++.
 
-- **Capture the Flag:** I occasionally partake in CTF global events with a main focus on web, cryptography and steganography.
+**Capture the Flag:** I occasionally partake in CTF global events with a main focus on web, Cryptography and Steganography.
 
-- **Team:** [Cyclone](https://www.hackthebox.eu/home/teams/profile/1219) (Best rank: #2 out of 1931)
+**Hack the Box:** HTB is an online penetration testing platform with more than 400,000 Security Researchers worldwide. My peak rank was the fourth (4th) position globally.
 
-**Hack the Box:** HTB is an online penetration testing platform with more than 200,000 security researchers worldwide. My peak rank was the fourth (4th) position globally:
+**Team:** [Cyclone](https://www.hackthebox.eu/home/teams/profile/1219) (Best rank: #2 out of 1931)
 
 <img src="assets/images/HTB-members-HoF.jpg">
 
 ### Mentions
-- [University of Business and Technology / Cyber Security Week Lecturer](assets/pdfs/UBT_Cyber-Resilience.pdf)
+- [University of Business and Technology / Cyber Security Week](assets/pdfs/UBT_Cyber-Resilience.pdf)
 - [ICTSmedia / Albanian ICT Awards VIII](https://ictawards.org/2019/edicioni-i-8-te-i-ict-awards-ndan-cmimet-per-historite-shqiptare-te-suksesit-ne-teknologji/)
 - [Wallencore / XOR Regional CTF](https://wallencore.com/wallencore-awards-certificates-of-achievement-to-xorctf74e-2020-contest-winners/)
-- [Cacttus Education / Cyber Security Panel Speaker](https://cacttus.education/cacttus-education-se-bashku-me-cyber-academy-dhe-cacttus-organizuan-panelin-mbi-sigurine-kibernetike/)
+- [Cacttus Education / Cyber Security Panel](https://cacttus.education/cacttus-education-se-bashku-me-cyber-academy-dhe-cacttus-organizuan-panelin-mbi-sigurine-kibernetike/)
 - [Cyber Academy / Hall of Fame](https://cyberacademy.co/#alumnitext)
 - [Sentry Cybersecurity / Cyber Defense Week](https://sentry.co.com/2019/06/11/cyber-defense-week-2018/)
 
@@ -93,6 +118,6 @@ section {
 - [PGP: 6250 DB1D 7BBB A441 9840 C3EF 096D E9BF 56A0 EBE0](assets/txt/pgp-pub.txt)
 
 <hr>
-<p style="text-align: center;">
-If you find my material helpful and would like to buy me a beer, you can do so through <a href="https://www.paypal.com/paypalme/artikrh">paypal.me/artikrh</a>
-</p>
+<p style="text-align: center;"><i>
+You can support my work through <a href="https://www.paypal.com/paypalme/artikrh">paypal.me/artikrh</a> – thank you!
+</i></p>
