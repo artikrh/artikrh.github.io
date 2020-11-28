@@ -73,7 +73,7 @@ hr.splitter {
 
 <hr>
 
-### 3. Capture the Flag Writeups
+### 3. Capture the Flag Documentations
 - **September 30, 2018 —** [Access / MDB SQL & Stored Credentials](assets/pdfs/Access.pdf)
 - **August 28, 2018 —** [SecNotes / SQLi & Password Leak](assets/pdfs/SecNotes.pdf)
 - **August 26, 2018 —** [Dab / Memcached Breach & Shared Library Hijack](assets/pdfs/Dab.pdf)
