@@ -102,6 +102,7 @@ hr.splitter {
 <img src="assets/images/HTB-members-HoF.jpg">
 
 ### Mentions
+- [University of Prishtina / Diploma Work](https://www.linkedin.com/feed/update/urn:li:activity:6736571726630584321/)
 - [University of Business and Technology / Cyber Security Week](assets/pdfs/UBT_Cyber-Resilience.pdf)
 - [ICTSmedia / Albanian ICT Awards VIII](https://ictawards.org/2019/edicioni-i-8-te-i-ict-awards-ndan-cmimet-per-historite-shqiptare-te-suksesit-ne-teknologji/)
 - [Wallencore / XOR Regional CTF](https://wallencore.com/wallencore-awards-certificates-of-achievement-to-xorctf74e-2020-contest-winners/)
