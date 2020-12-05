@@ -7,7 +7,7 @@ image:
 ---
 
 ## 1. Introduction
-This website, https://artikrh.github.io (hereinafter: “the website”) uses cookies and other related technologies (for convenience all technologies are referred to as “cookies”). Cookies are also placed by third parties we have engaged.
+This website, https://artikrh.github.io (hereinafter: “the website”) uses cookies and other related technologies (for convenience all technologies are referred to as “cookies”). Cookies are also placed by third parties, in this case, Google Analytics.
 
 ## 2. What are cookies?
 A cookie is a small simple file that is sent along with pages of this website and stored by your browser on the hard drive of your computer or another device. The information stored therein may be returned to our servers or to the servers of the relevant third parties during a subsequent visit.
