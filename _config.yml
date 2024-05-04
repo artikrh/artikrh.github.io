@@ -12,3 +12,6 @@ github_username: artikrh
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
+webrick:
+  headers:
+    Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self';
