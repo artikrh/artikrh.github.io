@@ -1,33 +1,34 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-US">
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
    <meta charset="utf-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <!-- <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?"> -->
-   <link rel="icon" type="image/png" href="/favicon.png"/>
+   <link rel="icon" type="image/png" href="/favicon.png">
    <!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Weevely Backdoor Analysis | Arti Karahoda</title>
-<meta name="generator" content="Jekyll v3.9.5" />
-<meta property="og:title" content="Weevely Backdoor Analysis" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process." />
-<meta property="og:description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process." />
-<link rel="canonical" href="https://artikrh.github.io/posts/weevely-backdoor-analysis.html" />
-<meta property="og:url" content="https://artikrh.github.io/posts/weevely-backdoor-analysis.html" />
-<meta property="og:site_name" content="Arti Karahoda" />
-<meta property="og:image" content="https://artikrh.github.io/assets/images/weevely.png" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta property="twitter:image" content="https://artikrh.github.io/assets/images/weevely.png" />
-<meta property="twitter:title" content="Weevely Backdoor Analysis" />
+<meta name="generator" content="Jekyll v3.9.5">
+<meta property="og:title" content="Weevely Backdoor Analysis">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.">
+<meta property="og:description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.">
+<link rel="canonical" href="https://artikrh.github.io/posts/weevely-backdoor-analysis.html">
+<meta property="og:url" content="https://artikrh.github.io/posts/weevely-backdoor-analysis.html">
+<meta property="og:site_name" content="Arti Karahoda">
+<meta property="og:image" content="https://artikrh.github.io/assets/images/weevely.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="twitter:image" content="https://artikrh.github.io/assets/images/weevely.png">
+<meta property="twitter:title" content="Weevely Backdoor Analysis">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage","description":"Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.","headline":"Weevely Backdoor Analysis","image":"https://artikrh.github.io/assets/images/weevely.png","url":"https://artikrh.github.io/posts/weevely-backdoor-analysis.html"}</script>
 <!-- End Jekyll SEO tag -->
 
-   <meta property="og:image:width" content="1200" />
-   <meta property="og:image:height" content="630" />
+   <meta property="og:image:width" content="1200">
+   <meta property="og:image:height" content="630">
    <meta property="og:type" content="article">
-   <meta property='article:author' content='Arti Karahoda'/>
+   <meta property="article:author" content="Arti Karahoda">
    <link rel="stylesheet" href="/assets/css/style.css?v=">
    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
    <script src="/assets/js/respond.js"></script>
@@ -38,7 +39,11 @@
    <link rel="stylesheet" href="/assets/css/ie.css">
    <![endif]-->
    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
-   <div id="_progress"></div>
+   <style>#csp-gen-83ca25723aef085166eeca39ee291540 { color: silver; } </style>
+<meta http-equiv="Content-Security-Policy" content="frame-src 'self'; img-src 'self'; style-src 'self' 'sha256-OnDfcvJmumQsb0Xi6vwD/BAokQK/pJxOJ+E70sGKGds=' 'sha256-6XhvyFmP37O+WJmIEbA+/T0hSbx9IEAhjSWjJGsov+c=' 'sha256-QL4QXjwZHattMzbjR3q0FMDxyKgYASI0/Clcl+oztEM=' 'sha256-/pwv0f4WZ5vloMqW8mQMghsyIA/kHqmuUX782FZU2S8=' 'sha256-r6u3GAJnZ3iUEv09wLvtPHVanfeEAdn5cDlaPH7HZ0c='; script-src 'self' 'sha256-USpNJZ/Xz02isd8WJ3iKZ9b9/WRwgeSsPoEBfPewWvQ=' https://code.jquery.com/ 'sha256-wGVWn4WyLNZ3UiH/sgQZa7TN8/wSPTwAcKK559uwi44=' 'sha256-fyurAc0ZhgqXT0dpm1dHyVKCzfUkw2T0s5LyHdYN0VE=' 'sha256-AinAZNuWrzn7ADM7Cm44EyrzoW3AC4mraNsP1gsvIO8='; ">
+</head>
+<body>
+<div id="_progress"></div>
 <a id="button"></a>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
@@ -288,13 +293,13 @@ btn.on('click', function(e) {
   $('html, body').animate({scrollTop:0}, '300');
 });
 </script>
-</head>
-<body>
+
+
    <div class="wrapper">
       <section>
          <div id="title">
             <h1>Arti Karahoda</h1>
-            <p>Cyber Security & Data Protection</p>
+            <p>Cyber Security &amp; Data Protection</p>
             <ul id="nav">
                <li><a class="blk" href="/">Home</a></li>
                <li><a class="blk" href="/#posts">Posts</a></li>
@@ -347,7 +352,7 @@ pre, code {
 <p><i><strong>30 March, 2020</strong> — <a href="../">Go back to homepage</a></i></p>
 <h1 id="weevely-backdoor-analysis--blue-team-dfir">Weevely Backdoor Analysis / Blue Team DFIR</h1>
 
-<p><img align="center" src="/assets/images/weevely.png" /></p>
+<p><img align="center" src="/assets/images/weevely.png"></p>
 
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
@@ -381,17 +386,17 @@ pre, code {
 
 <p>For this section, let’s suppose we are performing digital forensics and incident response. We can use Wireshark to examine the network traffic by using the <code class="language-plaintext highlighter-rouge">http.request.uri contains "artikrh.php"</code> filter to identify relevant packets to the suspicious PHP file:</p>
 
-<p><img src="/assets/images/weevely1.png" alt="Weevely Packets" /></p>
+<p><img src="/assets/images/weevely1.png" alt="Weevely Packets"></p>
 
 <p>Following the HTTP stream of these packets show gibberish POST data which may imply encryption and/or encoding:</p>
 
-<p><img src="/assets/images/weevely2.png" alt="Weevely TCP Stream" /></p>
+<p><img src="/assets/images/weevely2.png" alt="Weevely TCP Stream"></p>
 
 <figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">.XJ_Aaf.Yzk+W,so11a12a4a68f2Gqx5ev6t4ATRBAeG5NExNHoRMQo120bb3b9572cI.O5V$</span>bDA2<span class="k">*</span>7A!fm</code></pre></figure>
 
 <p>If we take a close look at it from a high-level perspective, we may notice some random unidentified bytes at the beginning (<code class="language-plaintext highlighter-rouge">.XJ_Aaf.Yzk+W,so</code>) followed by what seems to be hexadecimal values (<code class="language-plaintext highlighter-rouge">11a12a4a68f2</code>) and Base64-encoded content (<code class="language-plaintext highlighter-rouge">Gqx5ev6t4ATRBAeG5NExNHoRMQo</code>). At the end of this data, we may notice additional hex numbers followed by again random data in a structure as seen below:</p>
 
-<p><img src="/assets/images/weevely-data.svg" alt="Weevely Data Skeleton" /></p>
+<p><img src="/assets/images/weevely-data.svg" alt="Weevely Data Skeleton"></p>
 
 <p>At this point, the only part that we can make sense of is the Base64-encoded part, but which results in possible encrypted data when decoded:</p>
 
@@ -421,10 +426,18 @@ pre, code {
 
 <p>Clearly, the PHP is obfuscated, however we can already see suspicious functions such as:</p>
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">ob_stQart</code> =&gt; <a href="https://www.php.net/manual/en/function.ob-start.php">ob_start()</a></li>
-  <li><code class="language-plaintext highlighter-rouge">evQal</code> =&gt; <a href="https://www.php.net/manual/en/function.eval.php">eval()</a></li>
-  <li><code class="language-plaintext highlighter-rouge">gzuncoQmpress</code> =&gt; <a href="https://www.php.net/manual/en/function.gzuncompress.php">gzuncompress()</a></li>
-  <li><code class="language-plaintext highlighter-rouge">base6Q4_deQcode</code> =&gt; <a href="https://www.php.net/manual/en/function.base64-decode.php">base64_decode()</a></li>
+  <li>
+<code class="language-plaintext highlighter-rouge">ob_stQart</code> =&gt; <a href="https://www.php.net/manual/en/function.ob-start.php">ob_start()</a>
+</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">evQal</code> =&gt; <a href="https://www.php.net/manual/en/function.eval.php">eval()</a>
+</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gzuncoQmpress</code> =&gt; <a href="https://www.php.net/manual/en/function.gzuncompress.php">gzuncompress()</a>
+</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">base6Q4_deQcode</code> =&gt; <a href="https://www.php.net/manual/en/function.base64-decode.php">base64_decode()</a>
+</li>
 </ul>
 
 <p>As a side note, you can google parts of this code in Google which may lead you eventually to Weevely3-related artifacts, so you know what the attacker has used. Do keep in mind that the script is polymorphic, therefore, the function order and variable names will always change randomly during generation.</p>
@@ -480,26 +493,33 @@ pre, code {
 
 <p>This means that if HTTP request POST data contains <code class="language-plaintext highlighter-rouge">$kh</code> (the initial <code class="language-plaintext highlighter-rouge">11a12a4a68f2</code> hex data we identified earlier) and <code class="language-plaintext highlighter-rouge">$kf</code> (the enclosing <code class="language-plaintext highlighter-rouge">120bb3b9572c</code>) strings in it, store the match(es) in array <code class="language-plaintext highlighter-rouge">$m</code> (as described in PHP’s <a href="https://www.php.net/manual/en/function.file-get-contents.php"><code class="language-plaintext highlighter-rouge">file_get_contents()</code></a> built-in function). In this case, the array will be comprised of two items:</p>
 <ol>
-  <li><code class="language-plaintext highlighter-rouge">$m[0]</code> =&gt; the whole match: <code class="language-plaintext highlighter-rouge">$kh</code> (12 chars) + Base64 data + <code class="language-plaintext highlighter-rouge">$kf</code> (12 chars)</li>
-  <li><code class="language-plaintext highlighter-rouge">$m[1]</code> =&gt; match in between static delimiters (<code class="language-plaintext highlighter-rouge">$kh</code>, <code class="language-plaintext highlighter-rouge">$kf</code>): Base64 data</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">$m[0]</code> =&gt; the whole match: <code class="language-plaintext highlighter-rouge">$kh</code> (12 chars) + Base64 data + <code class="language-plaintext highlighter-rouge">$kf</code> (12 chars)</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">$m[1]</code> =&gt; match in between static delimiters (<code class="language-plaintext highlighter-rouge">$kh</code>, <code class="language-plaintext highlighter-rouge">$kf</code>): Base64 data</li>
 </ol>
 
 <p>It is worth noting that the regular expression excludes the unidentified random data at both ends of POST request string, so the initial diagram is transformed into:</p>
 
-<p><img src="/assets/images/weevely-data2.svg" alt="Weevely Data Skeleton 2" /></p>
+<p><img src="/assets/images/weevely-data2.svg" alt="Weevely Data Skeleton 2"></p>
 
 <p>The <code class="language-plaintext highlighter-rouge">eval()</code> bit is comprised in the following manner:</p>
 <ol>
   <li>Initially, <code class="language-plaintext highlighter-rouge">$m[1]</code> (data) is Base64 decoded</li>
   <li>Decoded data is XOR decrypted with key <code class="language-plaintext highlighter-rouge">$k</code> (in this case: <code class="language-plaintext highlighter-rouge">b0270e74</code>)</li>
-  <li>Decrypted data is GNU zip (Gzip) decompressed to provide the arbitrary PHP code which is then executed by <code class="language-plaintext highlighter-rouge">eval()</code></li>
+  <li>Decrypted data is GNU zip (Gzip) decompressed to provide the arbitrary PHP code which is then executed by <code class="language-plaintext highlighter-rouge">eval()</code>
+</li>
 </ol>
 
 <p>Output buffer (OB) functions are used to retrieve executed commands’ result:</p>
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">ob_start()</code>: Turns on output buffering</li>
-  <li><code class="language-plaintext highlighter-rouge">ob_get_contents()</code>: Standard out from the execution of arbitrary PHP code from <code class="language-plaintext highlighter-rouge">eval()</code></li>
-  <li><code class="language-plaintext highlighter-rouge">ob_end_clean()</code>: Cleans the output buffer and turns off output buffering</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">ob_start()</code>: Turns on output buffering</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">ob_get_contents()</code>: Standard out from the execution of arbitrary PHP code from <code class="language-plaintext highlighter-rouge">eval()</code>
+</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">ob_end_clean()</code>: Cleans the output buffer and turns off output buffering</li>
 </ul>
 
 <p>Since we now have a clear idea on what the script does, we can decrypt traffic by backtracking. In summary, we can retrieve the first packet data in plaintext by storing it into a variable (in this case <code class="language-plaintext highlighter-rouge">$phpinput</code>) and printing the raw PHP code instead of sending it to <code class="language-plaintext highlighter-rouge">eval()</code>:</p>
@@ -669,11 +689,11 @@ pre, code {
 #share-buttons > div.mail > svg {height: 14px; margin-top: 11px;}
 </style>
 
-<span style="color: silver;">Share this on: </span><div id="share-buttons">
-    <div class="facebook" title="Share this on Facebook" onclick="window.open('https://facebook.com/sharer/sharer.php?u=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"/></svg></div>
-    <div class="twitter" title="Share this on Twitter" onclick="window.open('https://twitter.com/intent/tweet/?text=Weevely Backdoor Analysis by @artikrh&url=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"/></svg></div>
-    <div class="linkedin" title="Share this on Linkedin" onclick="window.open('https://www.linkedin.com/shareArticle?mini=true&url=https://artikrh.github.io/posts/weevely-backdoor-analysis.html&title=Arti Karahoda&summary=Arti Karahoda&source=GitHub');"><svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"/></svg></div>
-    <div class="mail" title="Share this through Email" onclick="window.open('mailto:?&body=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1792 710v794q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-794q44 49 101 87 362 246 497 345 57 42 92.5 65.5t94.5 48 110 24.5h2q51 0 110-24.5t94.5-48 92.5-65.5q170-123 498-345 57-39 100-87zm0-294q0 79-49 151t-122 123q-376 261-468 325-10 7-42.5 30.5t-54 38-52 32.5-57.5 27-50 9h-2q-23 0-50-9t-57.5-27-52-32.5-54-38-42.5-30.5q-91-64-262-182.5t-205-142.5q-62-42-117-115.5t-55-136.5q0-78 41.5-130t118.5-52h1472q65 0 112.5 47t47.5 113z"/></svg></div>
+<span id="csp-gen-83ca25723aef085166eeca39ee291540">Share this on: </span><div id="share-buttons">
+    <div class="facebook" title="Share this on Facebook" onclick="window.open('https://facebook.com/sharer/sharer.php?u=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"></path></svg></div>
+    <div class="twitter" title="Share this on Twitter" onclick="window.open('https://twitter.com/intent/tweet/?text=Weevely Backdoor Analysis by @artikrh&amp;url=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"></path></svg></div>
+    <div class="linkedin" title="Share this on Linkedin" onclick="window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=https://artikrh.github.io/posts/weevely-backdoor-analysis.html&amp;title=Arti Karahoda&amp;summary=Arti Karahoda&amp;source=GitHub');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"></path></svg></div>
+    <div class="mail" title="Share this through Email" onclick="window.open('mailto:?&amp;body=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1792 710v794q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-794q44 49 101 87 362 246 497 345 57 42 92.5 65.5t94.5 48 110 24.5h2q51 0 110-24.5t94.5-48 92.5-65.5q170-123 498-345 57-39 100-87zm0-294q0 79-49 151t-122 123q-376 261-468 325-10 7-42.5 30.5t-54 38-52 32.5-57.5 27-50 9h-2q-23 0-50-9t-57.5-27-52-32.5-54-38-42.5-30.5q-91-64-262-182.5t-205-142.5q-62-42-117-115.5t-55-136.5q0-78 41.5-130t118.5-52h1472q65 0 112.5 47t47.5 113z"></path></svg></div>
 </div>
       </div>
    </div>
@@ -687,5 +707,6 @@ pre, code {
       ga('send', 'pageview');
    </script>
    
+
 </body>
 </html>
