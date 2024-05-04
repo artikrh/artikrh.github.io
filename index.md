@@ -121,5 +121,4 @@ hr.splitter {
 ### Contact
 - [arti.karahoda@sense.co.com](mailto:arti.karahoda@sense.co.com)
 - [PGP: 6250 DB1D 7BBB A441 9840 C3EF 096D E9BF 56A0 EBE0](assets/txt/pgp-pub.txt)
-
 <hr>
