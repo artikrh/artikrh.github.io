@@ -119,12 +119,7 @@ hr.splitter {
 - [sense.co.com/cpo_team/arti-karahoda/](https://sense.co.com/cpo_team/arti-karahoda/)
 
 ### Contact
-- [arti.kh@protonmail.ch](mailto:arti.kh@protonmail.ch)
 - [arti.karahoda@sense.co.com](mailto:arti.karahoda@sense.co.com)
-- [Telegram: t.me/artikrh](https://t.me/artikrh)
 - [PGP: 6250 DB1D 7BBB A441 9840 C3EF 096D E9BF 56A0 EBE0](assets/txt/pgp-pub.txt)
 
 <hr>
-<p style="text-align: center;"><i>
-You can support my work through <a href="https://www.paypal.com/paypalme/artikrh">paypal.me/artikrh</a> – thank you!
-</i></p>
