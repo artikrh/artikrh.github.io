@@ -7,6 +7,7 @@ if [ -z "$input" ]
 then
 	echo "[*] No commit message was entered!"
 else
+	bundle update
 	bundle exec jekyll build
 	git add .
 	git commit -m "$input"
