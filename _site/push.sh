@@ -14,4 +14,3 @@ else
 	git push origin master
 	echo -n "[*] Git push successful"
 fi
-
