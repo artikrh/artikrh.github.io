@@ -8,21 +8,21 @@
    <link rel="icon" type="image/png" href="/favicon.png">
    <!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Weevely Backdoor Analysis | Arti Karahoda</title>
-<meta name="generator" content="Jekyll v3.10.0">
+<meta name="generator" content="Jekyll v4.4.1">
 <meta property="og:title" content="Weevely Backdoor Analysis">
 <meta property="og:locale" content="en_US">
 <meta name="description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.">
 <meta property="og:description" content="Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.">
-<link rel="canonical" href="https://artikrh.github.io/posts/weevely-backdoor-analysis.html">
-<meta property="og:url" content="https://artikrh.github.io/posts/weevely-backdoor-analysis.html">
+<link rel="canonical" href="http://localhost:4000/posts/weevely-backdoor-analysis.html">
+<meta property="og:url" content="http://localhost:4000/posts/weevely-backdoor-analysis.html">
 <meta property="og:site_name" content="Arti Karahoda">
-<meta property="og:image" content="https://artikrh.github.io/assets/images/weevely.png">
+<meta property="og:image" content="http://localhost:4000/assets/images/weevely.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta property="twitter:image" content="https://artikrh.github.io/assets/images/weevely.png">
+<meta property="twitter:image" content="http://localhost:4000/assets/images/weevely.png">
 <meta property="twitter:title" content="Weevely Backdoor Analysis">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","description":"Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.","headline":"Weevely Backdoor Analysis","image":"https://artikrh.github.io/assets/images/weevely.png","url":"https://artikrh.github.io/posts/weevely-backdoor-analysis.html"}</script>
+{"@context":"https://schema.org","@type":"WebPage","description":"Weevely is a powerful polymorphic backdoor used in web post-explotation; this tool is written in Python and it generates a small obfuscated PHP shell which is then delievered to the targeted web server. The article will lay out it’s communication chain and encryption scheme in order to assist blue team operators during a DFIR process.","headline":"Weevely Backdoor Analysis","image":"http://localhost:4000/assets/images/weevely.png","url":"http://localhost:4000/posts/weevely-backdoor-analysis.html"}</script>
 <!-- End Jekyll SEO tag -->
 
    <meta property="og:image:width" content="1200">
@@ -41,8 +41,8 @@
    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self' https://fonts.googleapis.com https://ajax.googleapis.com; script-src 'self' https://fonts.googleapis.com https://ajax.googleapis.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' ; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://ajax.googleapis.com; media-src 'self' ; object-src 'self' ; child-src 'self' ; frame-ancestors 'self' ; form-action 'none' ; sandbox allow-same-origin allow-scripts allow-pointer-lock;">
    
-   <style>#csp-gen-e614fce5a3beb62e12c1a1edde3407b8 { color: silver; } </style>
-<meta http-equiv="Content-Security-Policy" content="frame-src 'self'; img-src 'self'; style-src 'self' 'sha256-i/pcLTNfB7GtV4ct7TeL6QEQ7l2IYtHhHTF6U4MAxSg=' 'sha256-6XhvyFmP37O+WJmIEbA+/T0hSbx9IEAhjSWjJGsov+c=' 'sha256-QL4QXjwZHattMzbjR3q0FMDxyKgYASI0/Clcl+oztEM=' 'sha256-/pwv0f4WZ5vloMqW8mQMghsyIA/kHqmuUX782FZU2S8=' 'sha256-r6u3GAJnZ3iUEv09wLvtPHVanfeEAdn5cDlaPH7HZ0c='; script-src 'self' 'sha256-USpNJZ/Xz02isd8WJ3iKZ9b9/WRwgeSsPoEBfPewWvQ=' https://code.jquery.com/ 'sha256-wGVWn4WyLNZ3UiH/sgQZa7TN8/wSPTwAcKK559uwi44=' 'sha256-fyurAc0ZhgqXT0dpm1dHyVKCzfUkw2T0s5LyHdYN0VE=' 'sha256-AinAZNuWrzn7ADM7Cm44EyrzoW3AC4mraNsP1gsvIO8='; ">
+   <style>#csp-gen-57ea01dcef50147cd03d7699013db185 { color: silver; } </style>
+<meta http-equiv="Content-Security-Policy" content="frame-src 'self'; img-src 'self'; style-src 'self' 'sha256-4deGGCZKxWV7CHo3dSan/Wd3fAYgsIqh+XE0oYgikI0=' 'sha256-6XhvyFmP37O+WJmIEbA+/T0hSbx9IEAhjSWjJGsov+c=' 'sha256-QL4QXjwZHattMzbjR3q0FMDxyKgYASI0/Clcl+oztEM=' 'sha256-/pwv0f4WZ5vloMqW8mQMghsyIA/kHqmuUX782FZU2S8=' 'sha256-r6u3GAJnZ3iUEv09wLvtPHVanfeEAdn5cDlaPH7HZ0c='; script-src 'self' 'sha256-/gIju7H8RbFTfB1vgJ0hA5WdmbtGU6BCBZzx1azhaRU=' https://code.jquery.com/ 'sha256-wGVWn4WyLNZ3UiH/sgQZa7TN8/wSPTwAcKK559uwi44=' 'sha256-fyurAc0ZhgqXT0dpm1dHyVKCzfUkw2T0s5LyHdYN0VE=' 'sha256-AinAZNuWrzn7ADM7Cm44EyrzoW3AC4mraNsP1gsvIO8='; ">
 </head>
 <body>
 <div id="_progress"></div>
@@ -691,11 +691,11 @@ pre, code {
 #share-buttons > div.mail > svg {height: 14px; margin-top: 11px;}
 </style>
 
-<span id="csp-gen-e614fce5a3beb62e12c1a1edde3407b8">Share this on: </span><div id="share-buttons">
-    <div class="facebook" title="Share this on Facebook" onclick="window.open('https://facebook.com/sharer/sharer.php?u=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"></path></svg></div>
-    <div class="twitter" title="Share this on Twitter" onclick="window.open('https://twitter.com/intent/tweet/?text=Weevely Backdoor Analysis by @artikrh&amp;url=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"></path></svg></div>
-    <div class="linkedin" title="Share this on Linkedin" onclick="window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=https://artikrh.github.io/posts/weevely-backdoor-analysis.html&amp;title=Arti Karahoda&amp;summary=Arti Karahoda&amp;source=GitHub');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"></path></svg></div>
-    <div class="mail" title="Share this through Email" onclick="window.open('mailto:?&amp;body=https://artikrh.github.io/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1792 710v794q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-794q44 49 101 87 362 246 497 345 57 42 92.5 65.5t94.5 48 110 24.5h2q51 0 110-24.5t94.5-48 92.5-65.5q170-123 498-345 57-39 100-87zm0-294q0 79-49 151t-122 123q-376 261-468 325-10 7-42.5 30.5t-54 38-52 32.5-57.5 27-50 9h-2q-23 0-50-9t-57.5-27-52-32.5-54-38-42.5-30.5q-91-64-262-182.5t-205-142.5q-62-42-117-115.5t-55-136.5q0-78 41.5-130t118.5-52h1472q65 0 112.5 47t47.5 113z"></path></svg></div>
+<span id="csp-gen-57ea01dcef50147cd03d7699013db185">Share this on: </span><div id="share-buttons">
+    <div class="facebook" title="Share this on Facebook" onclick="window.open('https://facebook.com/sharer/sharer.php?u=http://localhost:4000/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1343 12v264h-157q-86 0-116 36t-30 108v189h293l-39 296h-254v759h-306v-759h-255v-296h255v-218q0-186 104-288.5t277-102.5q147 0 228 12z"></path></svg></div>
+    <div class="twitter" title="Share this on Twitter" onclick="window.open('https://twitter.com/intent/tweet/?text=Weevely Backdoor Analysis by @artikrh&amp;url=http://localhost:4000/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1684 408q-67 98-162 167 1 14 1 42 0 130-38 259.5t-115.5 248.5-184.5 210.5-258 146-323 54.5q-271 0-496-145 35 4 78 4 225 0 401-138-105-2-188-64.5t-114-159.5q33 5 61 5 43 0 85-11-112-23-185.5-111.5t-73.5-205.5v-4q68 38 146 41-66-44-105-115t-39-154q0-88 44-163 121 149 294.5 238.5t371.5 99.5q-8-38-8-74 0-134 94.5-228.5t228.5-94.5q140 0 236 102 109-21 205-78-37 115-142 178 93-10 186-50z"></path></svg></div>
+    <div class="linkedin" title="Share this on Linkedin" onclick="window.open('https://www.linkedin.com/shareArticle?mini=true&amp;url=http://localhost:4000/posts/weevely-backdoor-analysis.html&amp;title=Arti Karahoda&amp;summary=Arti Karahoda&amp;source=GitHub');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M477 625v991h-330v-991h330zm21-306q1 73-50.5 122t-135.5 49h-2q-82 0-132-49t-50-122q0-74 51.5-122.5t134.5-48.5 133 48.5 51 122.5zm1166 729v568h-329v-530q0-105-40.5-164.5t-126.5-59.5q-63 0-105.5 34.5t-63.5 85.5q-11 30-11 81v553h-329q2-399 2-647t-1-296l-1-48h329v144h-2q20-32 41-56t56.5-52 87-43.5 114.5-15.5q171 0 275 113.5t104 332.5z"></path></svg></div>
+    <div class="mail" title="Share this through Email" onclick="window.open('mailto:?&amp;body=http://localhost:4000/posts/weevely-backdoor-analysis.html');"><svg viewbox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1792 710v794q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-794q44 49 101 87 362 246 497 345 57 42 92.5 65.5t94.5 48 110 24.5h2q51 0 110-24.5t94.5-48 92.5-65.5q170-123 498-345 57-39 100-87zm0-294q0 79-49 151t-122 123q-376 261-468 325-10 7-42.5 30.5t-54 38-52 32.5-57.5 27-50 9h-2q-23 0-50-9t-57.5-27-52-32.5-54-38-42.5-30.5q-91-64-262-182.5t-205-142.5q-62-42-117-115.5t-55-136.5q0-78 41.5-130t118.5-52h1472q65 0 112.5 47t47.5 113z"></path></svg></div>
 </div>
       </div>
    </div>

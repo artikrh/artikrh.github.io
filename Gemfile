@@ -1,8 +1,8 @@
 source "https://rubygems.org"
 
-gem "jekyll", ">= 3.6.3"
+gem "jekyll", "4.4.1"
 
-gem 'jekyll-theme-midnight', '~> 0.0.3'
+gem 'jekyll-theme-midnight', '0.2.0'
 
 gem 'jekyll-seo-tag'
 
