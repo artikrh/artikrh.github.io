@@ -9,6 +9,8 @@ updates:
       timezone: "Europe/Vienna"
     open-pull-requests-limit: 5
     rebase-strategy: "auto"
+    cooldown:
+      default-days: 3
     labels:
       - "dependencies"
       - "ruby"
